@@ -42,7 +42,8 @@ const ScrollSection = () => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveSection(Number(entry.target.dataset.id));
+            const target = entry.target as HTMLElement;
+            setActiveSection(Number(target.dataset.id));
           }
         });
       },
