@@ -53,7 +53,7 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col gap-8 md:gap-16">
-          <h2 className="text-center text-4xl text-primText font-semibold">
+          <h2 className="text-center text-2xl md:text-4xl text-primText font-semibold">
             How It Works
           </h2>
 
