@@ -20,7 +20,7 @@ const config: Config = {
         InputColor: "#fbfbfb",
         BorderHighlight: "#6e63a5",
         header: "#eaeaea",
-        border1:"#23314c33",
+        border1:"#23314c19",
         primeHeader: "#f8f8f8",
         textInfo: "#23314c80",
         filedList: "#6e63a5",
