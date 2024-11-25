@@ -59,16 +59,24 @@ const ScrollSection = () => {
     touchEndY = e.touches[0].clientY;
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: TouchEvent) => {
     const swipeDistance = touchStartY - touchEndY;
     const minSwipeDistance = 50; // Minimum swipe distance to trigger a scroll
 
     if (swipeDistance > minSwipeDistance && activeSection < sections.length - 1) {
       // Swipe up
+      e.preventDefault();
       setActiveSection((prev) => prev + 1);
     } else if (swipeDistance < -minSwipeDistance && activeSection > 0) {
       // Swipe down
+      e.preventDefault();
       setActiveSection((prev) => prev - 1);
+    } else if (
+      (activeSection === 0 && swipeDistance < 0) ||
+      (activeSection === sections.length - 1 && swipeDistance > 0)
+    ) {
+      // Allow default behavior at the boundaries
+      return;
     }
   };
 
@@ -81,7 +89,7 @@ const ScrollSection = () => {
     // Mobile touch scroll
     container?.addEventListener("touchstart", handleTouchStart, { passive: true });
     container?.addEventListener("touchmove", handleTouchMove, { passive: true });
-    container?.addEventListener("touchend", handleTouchEnd, { passive: true });
+    container?.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     // Mouse movement detection
     const handleMouseMove = () => {
