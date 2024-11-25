@@ -9,6 +9,9 @@ import P3 from "@/public/p3.png";
 
 const ScrollSection = () => {
   const [activeSection, setActiveSection] = useState(0);
+  const [isMobile, setIsMobile] = useState(false); // Tracks if the device is mobile
+  let touchStartX = 0; // Tracks the initial X position of touch
+  let touchEndX = 0; // Tracks the final X position of touch
   let touchStartY = 0; // Tracks the initial Y position of touch
   let touchEndY = 0; // Tracks the final Y position of touch
 
@@ -39,13 +42,17 @@ const ScrollSection = () => {
     },
   ];
 
-  const lockBodyScroll = () => {
-    document.body.style.overflow = 'hidden';
-  };
+  // Determine if the user is on a mobile device
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
 
-  const unlockBodyScroll = () => {
-    document.body.style.overflow = '';
-  };
+    handleResize(); // Initial check
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleScroll = (e: WheelEvent) => {
     e.preventDefault();
@@ -58,35 +65,45 @@ const ScrollSection = () => {
   };
 
   const handleTouchStart = (e: TouchEvent) => {
+    touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
   };
 
   const handleTouchMove = (e: TouchEvent) => {
+    touchEndX = e.touches[0].clientX;
     touchEndY = e.touches[0].clientY;
   };
 
-  const handleTouchEnd = (e: TouchEvent) => {
-    const swipeDistance = touchStartY - touchEndY;
+  const handleTouchEnd = () => {
+    const swipeDistanceX = touchStartX - touchEndX;
+    const swipeDistanceY = touchStartY - touchEndY;
     const minSwipeDistance = 50; // Minimum swipe distance to trigger a scroll
 
-    if (swipeDistance > minSwipeDistance && activeSection < sections.length - 1) {
-      // Swipe up
-      setActiveSection((prev) => prev + 1);
-    } else if (swipeDistance < -minSwipeDistance && activeSection > 0) {
-      // Swipe down
-      setActiveSection((prev) => prev - 1);
+    // Horizontal swipe (for mobile)
+    if (isMobile && Math.abs(swipeDistanceX) > Math.abs(swipeDistanceY)) {
+      if (swipeDistanceX > minSwipeDistance && activeSection < sections.length - 1) {
+        // Swipe left
+        setActiveSection((prev) => prev + 1);
+      } else if (swipeDistanceX < -minSwipeDistance && activeSection > 0) {
+        // Swipe right
+        setActiveSection((prev) => prev - 1);
+      }
+    }
+
+    // Vertical swipe (fallback or desktop emulation on mobile)
+    if (!isMobile && Math.abs(swipeDistanceY) > Math.abs(swipeDistanceX)) {
+      if (swipeDistanceY > minSwipeDistance && activeSection < sections.length - 1) {
+        // Swipe up
+        setActiveSection((prev) => prev + 1);
+      } else if (swipeDistanceY < -minSwipeDistance && activeSection > 0) {
+        // Swipe down
+        setActiveSection((prev) => prev - 1);
+      }
     }
   };
 
   useEffect(() => {
     const container = document.getElementById("scroll-container");
-
-    // Lock scroll when interacting with the div
-    if (activeSection > 0 && activeSection < sections.length - 1) {
-      lockBodyScroll();
-    } else {
-      unlockBodyScroll();
-    }
 
     // Desktop scroll
     container?.addEventListener("wheel", handleScroll, { passive: false });
@@ -104,10 +121,11 @@ const ScrollSection = () => {
     };
   }, [activeSection]);
 
+  // Framer Motion Variants
   const fadeVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-    exit: { opacity: 0 },
+    hidden: isMobile ? { opacity: 0, x: 100 } : { opacity: 0 },
+    visible: { opacity: 1, x: 0 },
+    exit: isMobile ? { opacity: 0, x: -100 } : { opacity: 0 },
   };
 
   return (
@@ -122,12 +140,12 @@ const ScrollSection = () => {
         }
       `}</style>
 
-      <div className="absolute top-0 left-0 w-full h-full">
+      <div className="absolute top-0 left-0 w-full h-full flex flex-row">
         <AnimatePresence mode="wait">
           {sections.map((section, index) => (
             <motion.div
               key={section.id}
-              className={`absolute top-0 left-0 w-full h-full flex flex-col md:flex-row gap-1 ${
+              className={`absolute w-full h-full flex flex-col md:flex-row gap-1 ${
                 index === activeSection ? "z-10" : "z-0"
               }`}
               initial="hidden"
@@ -162,16 +180,33 @@ const ScrollSection = () => {
         </AnimatePresence>
       </div>
 
-      <div className="absolute top-0 left-0 h-full flex flex-col justify-center items-center z-10">
-        <div className="relative h-2/5 md:h-3/5 w-1 md:w-2 bg-[#F8F8F8] rounded-full">
-          <motion.div
-            className="absolute w-2 bg-primText rounded-full h-1/3"
-            initial={{ top: "0%" }}
-            animate={{ top: `${activeSection * (100 / sections.length)}%` }}
-            transition={{ duration: 0.5 }}
-          />
+      {/* Bottom Scroll Bar for Mobile */}
+      {isMobile ? (
+        <div className="absolute bottom-0 left-0 w-full h-2 flex items-center justify-center">
+          <div className="relative w-3/5 h-1 bg-[#F8F8F8] rounded-full">
+            <motion.div
+              className="absolute h-full bg-primText rounded-full"
+              initial={{ width: `${100 / sections.length}%` }}
+              animate={{
+                width: `${100 / sections.length}%`,
+                left: `${activeSection * (100 / sections.length)}%`,
+              }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="absolute top-0 left-0 h-full flex flex-col justify-center items-center z-10">
+          <div className="relative h-2/5 md:h-3/5 w-1 md:w-2 bg-[#F8F8F8] rounded-full">
+            <motion.div
+              className="absolute w-2 bg-primText rounded-full h-1/3"
+              initial={{ top: "0%" }}
+              animate={{ top: `${activeSection * (100 / sections.length)}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
