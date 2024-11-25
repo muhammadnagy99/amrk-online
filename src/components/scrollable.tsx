@@ -1,20 +1,13 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import P1 from "@/public/p1.png";
 import P2 from "@/public/p2.png";
 import P3 from "@/public/p3.png";
 
 const ScrollSection = () => {
-  const [activeSection, setActiveSection] = useState(0);
-  const [isMobile, setIsMobile] = useState(false); // Tracks if the device is mobile
-  let touchStartX = 0; // Tracks the initial X position of touch
-  let touchEndX = 0; // Tracks the final X position of touch
-  let touchStartY = 0; // Tracks the initial Y position of touch
-  let touchEndY = 0; // Tracks the final Y position of touch
-
   const sections = [
     {
       id: 0,
@@ -42,171 +35,75 @@ const ScrollSection = () => {
     },
   ];
 
-  // Determine if the user is on a mobile device
+  const [activeSection, setActiveSection] = useState<number | null>(null);
+
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(Number(entry.target.dataset.id));
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
 
-    handleResize(); // Initial check
-    window.addEventListener("resize", handleResize);
+    const sections = document.querySelectorAll(".snap-section");
+    sections.forEach((section) => observer.observe(section));
 
-    return () => window.removeEventListener("resize", handleResize);
+    return () => observer.disconnect();
   }, []);
 
-  const handleScroll = (e: WheelEvent) => {
-    e.preventDefault();
-
-    if (e.deltaY > 0 && activeSection < sections.length - 1) {
-      setActiveSection((prev) => prev + 1);
-    } else if (e.deltaY < 0 && activeSection > 0) {
-      setActiveSection((prev) => prev - 1);
-    }
-  };
-
-  const handleTouchStart = (e: TouchEvent) => {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-  };
-
-  const handleTouchMove = (e: TouchEvent) => {
-    touchEndX = e.touches[0].clientX;
-    touchEndY = e.touches[0].clientY;
-  };
-
-  const handleTouchEnd = () => {
-    const swipeDistanceX = touchStartX - touchEndX;
-    const swipeDistanceY = touchStartY - touchEndY;
-    const minSwipeDistance = 50; // Minimum swipe distance to trigger a scroll
-
-    // Horizontal swipe (for mobile)
-    if (isMobile && Math.abs(swipeDistanceX) > Math.abs(swipeDistanceY)) {
-      if (swipeDistanceX > minSwipeDistance && activeSection < sections.length - 1) {
-        // Swipe left
-        setActiveSection((prev) => prev + 1);
-      } else if (swipeDistanceX < -minSwipeDistance && activeSection > 0) {
-        // Swipe right
-        setActiveSection((prev) => prev - 1);
-      }
-    }
-
-    // Vertical swipe (fallback or desktop emulation on mobile)
-    if (!isMobile && Math.abs(swipeDistanceY) > Math.abs(swipeDistanceX)) {
-      if (swipeDistanceY > minSwipeDistance && activeSection < sections.length - 1) {
-        // Swipe up
-        setActiveSection((prev) => prev + 1);
-      } else if (swipeDistanceY < -minSwipeDistance && activeSection > 0) {
-        // Swipe down
-        setActiveSection((prev) => prev - 1);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const container = document.getElementById("scroll-container");
-
-    // Desktop scroll
-    container?.addEventListener("wheel", handleScroll, { passive: false });
-
-    // Mobile touch scroll
-    container?.addEventListener("touchstart", handleTouchStart, { passive: true });
-    container?.addEventListener("touchmove", handleTouchMove, { passive: true });
-    container?.addEventListener("touchend", handleTouchEnd, { passive: true });
-
-    return () => {
-      container?.removeEventListener("wheel", handleScroll);
-      container?.removeEventListener("touchstart", handleTouchStart);
-      container?.removeEventListener("touchmove", handleTouchMove);
-      container?.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [activeSection]);
-
-  // Framer Motion Variants
-  const fadeVariants = {
-    hidden: isMobile ? { opacity: 0, x: 100 } : { opacity: 0 },
-    visible: { opacity: 1, x: 0 },
-    exit: isMobile ? { opacity: 0, x: -100 } : { opacity: 0 },
-  };
-
   return (
-    <div
-      id="scroll-container"
-      className="relative w-full h-[480px] overflow-hidden"
-      style={{ scrollbarWidth: "none" }}
-    >
-      <style jsx global>{`
-        #scroll-container::-webkit-scrollbar {
-          display: none; /* Hides scrollbar on Chrome and Safari */
-        }
-      `}</style>
+    <div className="relative w-full h-[500px] overflow-hidden py-4 mb-12">
+      {/* Gradient mask for fading edges */}
+      <div className="absolute top-0 left-0 w-full h-8 md:h-12 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-full h-8 md:h-12 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none"></div>
 
-      <div className="absolute top-0 left-0 w-full h-full flex flex-row">
-        <AnimatePresence mode="wait">
-          {sections.map((section, index) => (
-            <motion.div
-              key={section.id}
-              className={`absolute w-full h-full flex flex-col md:flex-row gap-1 ${
-                index === activeSection ? "z-10" : "z-0"
-              }`}
-              initial="hidden"
-              animate={index === activeSection ? "visible" : "hidden"}
-              exit="exit"
-              variants={fadeVariants}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="w-full md:w-3/5 flex flex-col justify-center gap-4 px-6">
-                <p className="p-2 bg-[#b0438a19] text-[#b0438a] text-xs md:text-sm max-w-[150px] md:max-w-[160px] text-center">
-                  {section.label}
-                </p>
-                <h2 className="text-primText text-lg md:text-4xl font-semibold">
-                  {section.title}
-                </h2>
-                <p className="text-primText text-sm md:text-xl font-normal">
-                  {section.description}
-                </p>
-              </div>
-              <div className="w-full md:w-2/5">
-                <Image
-                  src={section.image}
-                  width={490}
-                  height={400}
-                  alt={`Amrk Online Solutions ${section.id}`}
-                  priority={false}
-                  placeholder="blur"
-                />
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-
-      {/* Bottom Scroll Bar for Mobile */}
-      {isMobile ? (
-        <div className="absolute bottom-0 left-0 w-full h-2 flex items-center justify-center">
-          <div className="relative w-3/5 h-1 bg-[#F8F8F8] rounded-full">
-            <motion.div
-              className="absolute h-full bg-primText rounded-full"
-              initial={{ width: `${100 / sections.length}%` }}
-              animate={{
-                width: `${100 / sections.length}%`,
-                left: `${activeSection * (100 / sections.length)}%`,
-              }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="absolute top-0 left-0 h-full flex flex-col justify-center items-center z-10">
-          <div className="relative h-2/5 md:h-3/5 w-1 md:w-2 bg-[#F8F8F8] rounded-full">
-            <motion.div
-              className="absolute w-2 bg-primText rounded-full h-1/3"
-              initial={{ top: "0%" }}
-              animate={{ top: `${activeSection * (100 / sections.length)}%` }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-        </div>
-      )}
+      <article
+        className="h-[490px] overflow-y-scroll scroll-snap-y-mandatory w-full flex flex-col items-center"
+        style={{ scrollSnapType: "y mandatory", scrollbarWidth: "none" }}
+      >
+        <style jsx global>{`
+          article::-webkit-scrollbar {
+            display: none; /* Hides scrollbar on Chrome and Safari */
+          }
+        `}</style>
+        {sections.map((section) => (
+          <motion.div
+            key={section.id}
+            data-id={section.id}
+            className="w-full h-[480px] flex flex-col md:flex-row scroll-snap-align-start max-w-[1200px] snap-section mb-12"
+            style={{ scrollSnapAlign: "start" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: activeSection === section.id ? 1 : 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="w-full md:w-3/5 flex flex-col justify-center gap-4 px-6">
+              <p className="p-2 bg-[#b0438a19] text-[#b0438a] text-xs md:text-sm max-w-[150px] md:max-w-[160px] text-center">
+                {section.label}
+              </p>
+              <h2 className="text-primText text-lg md:text-4xl font-semibold">
+                {section.title}
+              </h2>
+              <p className="text-primText text-sm md:text-xl font-normal">
+                {section.description}
+              </p>
+            </div>
+            <div className="w-full md:w-2/5 h-full flex items-center">
+              <Image
+                src={section.image}
+                width={490}
+                height={400}
+                alt={`Amrk Online Solutions ${section.id}`}
+                priority={false}
+                placeholder="blur"
+              />
+            </div>
+          </motion.div>
+        ))}
+      </article>
     </div>
   );
 };

@@ -11,7 +11,7 @@ export default function Home() {
       className="flex flex-col justify-center items-center w-full"
       aria-labelledby="Amrk-Business-Types"
     >
-      <div className="flex flex-col w-[88%] xl:max-w-[1200px] justify-between gap-10 md:gap-[120px] mt-12 mb-[80px]">
+      <div className="flex flex-col w-[88%] xl:max-w-[1200px] justify-between gap-10 md:gap-[120px] mt-12 mb-12 md:mb-[80px]">
         <div className="relative flex flex-col items-center justify-center h-[390px] md:h-[460px] w-full p-6 md:p-0">
           <div className="absolute h-full w-full">
             <Image
@@ -112,8 +112,8 @@ export default function Home() {
           </div>
         </div>
 
-       <ScrollSection />
       </div>
+       <ScrollSection />
     </section>
   );
 }
