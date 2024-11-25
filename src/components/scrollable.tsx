@@ -9,8 +9,6 @@ import P3 from "@/public/p3.png";
 
 const ScrollSection = () => {
   const [activeSection, setActiveSection] = useState(0);
-  const [isMouseStopped, setIsMouseStopped] = useState(false);
-  let mouseStopTimeout: NodeJS.Timeout | null = null;
   let touchStartY = 0; // Tracks the initial Y position of touch
   let touchEndY = 0; // Tracks the final Y position of touch
 
@@ -41,6 +39,14 @@ const ScrollSection = () => {
     },
   ];
 
+  const lockBodyScroll = () => {
+    document.body.style.overflow = 'hidden';
+  };
+
+  const unlockBodyScroll = () => {
+    document.body.style.overflow = '';
+  };
+
   const handleScroll = (e: WheelEvent) => {
     e.preventDefault();
 
@@ -65,23 +71,22 @@ const ScrollSection = () => {
 
     if (swipeDistance > minSwipeDistance && activeSection < sections.length - 1) {
       // Swipe up
-      e.preventDefault();
       setActiveSection((prev) => prev + 1);
     } else if (swipeDistance < -minSwipeDistance && activeSection > 0) {
       // Swipe down
-      e.preventDefault();
       setActiveSection((prev) => prev - 1);
-    } else if (
-      (activeSection === 0 && swipeDistance < 0) ||
-      (activeSection === sections.length - 1 && swipeDistance > 0)
-    ) {
-      // Allow default behavior at the boundaries
-      return;
     }
   };
 
   useEffect(() => {
     const container = document.getElementById("scroll-container");
+
+    // Lock scroll when interacting with the div
+    if (activeSection > 0 && activeSection < sections.length - 1) {
+      lockBodyScroll();
+    } else {
+      unlockBodyScroll();
+    }
 
     // Desktop scroll
     container?.addEventListener("wheel", handleScroll, { passive: false });
@@ -89,34 +94,15 @@ const ScrollSection = () => {
     // Mobile touch scroll
     container?.addEventListener("touchstart", handleTouchStart, { passive: true });
     container?.addEventListener("touchmove", handleTouchMove, { passive: true });
-    container?.addEventListener("touchend", handleTouchEnd, { passive: false });
-
-    // Mouse movement detection
-    const handleMouseMove = () => {
-      if (mouseStopTimeout) clearTimeout(mouseStopTimeout);
-      setIsMouseStopped(false);
-
-      mouseStopTimeout = setTimeout(() => {
-        setIsMouseStopped(true);
-      }, 1000); // 1 second
-    };
-
-    container?.addEventListener("mousemove", handleMouseMove);
+    container?.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     return () => {
       container?.removeEventListener("wheel", handleScroll);
       container?.removeEventListener("touchstart", handleTouchStart);
       container?.removeEventListener("touchmove", handleTouchMove);
       container?.removeEventListener("touchend", handleTouchEnd);
-      container?.removeEventListener("mousemove", handleMouseMove);
     };
   }, [activeSection]);
-
-  useEffect(() => {
-    if (isMouseStopped) {
-      console.log("Mouse stopped over the div for 1 second.");
-    }
-  }, [isMouseStopped]);
 
   const fadeVariants = {
     hidden: { opacity: 0 },
