@@ -11,6 +11,8 @@ const ScrollSection = () => {
   const [activeSection, setActiveSection] = useState(0);
   const [isMouseStopped, setIsMouseStopped] = useState(false);
   let mouseStopTimeout: NodeJS.Timeout | null = null;
+  let touchStartY = 0; // Tracks the initial Y position of touch
+  let touchEndY = 0; // Tracks the final Y position of touch
 
   const sections = [
     {
@@ -39,7 +41,6 @@ const ScrollSection = () => {
     },
   ];
 
-
   const handleScroll = (e: WheelEvent) => {
     e.preventDefault();
 
@@ -50,10 +51,37 @@ const ScrollSection = () => {
     }
   };
 
+  const handleTouchStart = (e: TouchEvent) => {
+    touchStartY = e.touches[0].clientY;
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    touchEndY = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = () => {
+    const swipeDistance = touchStartY - touchEndY;
+    const minSwipeDistance = 50; // Minimum swipe distance to trigger a scroll
+
+    if (swipeDistance > minSwipeDistance && activeSection < sections.length - 1) {
+      // Swipe up
+      setActiveSection((prev) => prev + 1);
+    } else if (swipeDistance < -minSwipeDistance && activeSection > 0) {
+      // Swipe down
+      setActiveSection((prev) => prev - 1);
+    }
+  };
+
   useEffect(() => {
     const container = document.getElementById("scroll-container");
 
+    // Desktop scroll
     container?.addEventListener("wheel", handleScroll, { passive: false });
+
+    // Mobile touch scroll
+    container?.addEventListener("touchstart", handleTouchStart, { passive: true });
+    container?.addEventListener("touchmove", handleTouchMove, { passive: true });
+    container?.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     // Mouse movement detection
     const handleMouseMove = () => {
@@ -69,6 +97,9 @@ const ScrollSection = () => {
 
     return () => {
       container?.removeEventListener("wheel", handleScroll);
+      container?.removeEventListener("touchstart", handleTouchStart);
+      container?.removeEventListener("touchmove", handleTouchMove);
+      container?.removeEventListener("touchend", handleTouchEnd);
       container?.removeEventListener("mousemove", handleMouseMove);
     };
   }, [activeSection]);
