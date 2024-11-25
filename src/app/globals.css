@@ -2,26 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+.button {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+  font-size: 14px;
+  text-align: center;
+  border-radius: 12px;
+  background-color: #B0438A; /* Original button color */
+  color: white;
+  z-index: 1; /* Ensures the button content is above the pseudo-element */
+  transition: color 0.3s ease-in-out;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #B0438A 0%, #DC5AAF 100%);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  z-index: 0; /* Keeps the pseudo-element behind the text */
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+.button:hover::before {
+  opacity: 1;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.button > * {
+  position: relative;
+  z-index: 2; /* Ensures the button content is above the pseudo-element */
 }
