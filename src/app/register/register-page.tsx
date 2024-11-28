@@ -50,12 +50,11 @@ export default function RegisterPage() {
 
   return (
     <>
-    <HeaderMobile />
     <div className="flex flex-row w-full h-[100vh]">
       <SideBar />
 
       <div className="w-full lg:w-4/5 flex items-center justify-center p-7 overflow-y-auto custom-scrollbar">
-        <div className="w-full lg:w-[70%] max-w-[770px] p-6 lg:p-7 rounded-2xl nav-card gap-3 flex flex-col lg:px-12 mt-8 lg:mt-24">
+        <div className="w-full lg:w-[70%] max-w-[770px] p-6 lg:p-7 rounded-2xl nav-card gap-3 flex flex-col lg:px-12 mt-6 lg:mt-24">
           {currentStep > 1 && (
             <button
               className="flex w-28 text-PrimBtn font-bold text-sm lg:text-base justify-start items-center gap-4"
