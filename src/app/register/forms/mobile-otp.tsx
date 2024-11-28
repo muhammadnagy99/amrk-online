@@ -58,7 +58,7 @@ export default function MobileOtp({onNext}: props) {
                   inputRefs.current[index] = el;
                 }}
                 type="text"
-                className="w-10 h-10 lg:w-14 lg:h-14 text-center text-2xl font-extrabold text-slate-900 bg-slate-100 border border-transparent hover:border-slate-200 appearance-none rounded-lg p-4 outline-none focus:bg-white focus:border-indigo-200 focus:ring-2 focus:ring-indigo-100"
+                className="w-10 h-10 lg:w-14 lg:h-14 text-center text-sm lg:text-2xl font-extrabold text-slate-900 bg-slate-100 border border-transparent hover:border-slate-200 appearance-none rounded-lg p-2 lg:p-4 outline-none focus:bg-white focus:border-indigo-200 focus:ring-2 focus:ring-indigo-100"
                 pattern="\d*"
                 maxLength={1}
                 onInput={(e: React.FormEvent<HTMLInputElement>) =>
