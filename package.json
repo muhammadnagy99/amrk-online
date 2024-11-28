@@ -9,12 +9,23 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "country-calling-code": "^0.0.3",
     "framer-motion": "^11.11.17",
+    "google-libphonenumber": "^3.2.38",
+    "i18n-iso-countries": "^7.13.0",
+    "negotiator": "1.0.0",
     "next": "14.2.18",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^18",
+    "react-select": "^5.8.3",
+    "react-transition-group": "^4.4.5",
+    "server-only": "0.0.1"
   },
   "devDependencies": {
+    "@types/google-libphonenumber": "^7.4.30",
+    "@types/negotiator": "0.6.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

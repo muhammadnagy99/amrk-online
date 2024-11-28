@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import { Rubik } from 'next/font/google';
+import { DM_Sans } from 'next/font/google';
 import "./globals.css";
 import Header from "@/src/components/header";
 import Footer from "@/src/components/footer";
 
-const rubik = Rubik({
+
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-rubik',
+  weight: ['300', '400', '500', '600', '700'], // Adjust weights as needed
+  variable: '--font-dm-sans',
   display: 'swap',
 });
 
@@ -24,11 +25,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${rubik.variable} antialiased`}
+        className={`${dmSans.variable} antialiased`}
       >
-        <Header />
-        {children}
-        <Footer />
+              {children}
+        
       </body>
     </html>
   );

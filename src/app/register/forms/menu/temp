@@ -1,0 +1,168 @@
+// AddonsSection.tsx
+import React, { useState } from "react";
+import { PlusIcon } from "../icons";
+
+const AddonsSection: React.FC = () => {
+  const [isAddonsVisible, setIsAddonsVisible] = useState(false);
+
+  const handleAddAddonsClick = () => {
+    setIsAddonsVisible(true);
+  };
+
+  return (
+    <>
+      {!isAddonsVisible && (
+        <button
+          type="button"
+          onClick={handleAddAddonsClick}
+          className="w-[160px] flex items-center gap-4 px-4 py-2 border-2 border-[#B0438A] text-[#B0438A] rounded-lg text-sm font-semibold focus:outline-none"
+        >
+          <PlusIcon />
+          Add Add-ons
+        </button>
+      )}
+      {isAddonsVisible && (
+        <>
+          <div className="flex flex-col bg-[#f7f7f7] gap-2 p-6 rounded-lg">
+            {/* Add-ons details here */}
+            <div className="flex flex-col gap-2">
+              <label className="text-base font-semibold text-primText">
+                Apply Saved Add-ons Group to Item
+              </label>
+              <div className="relative">
+                <select className="block w-full appearance-none border h-12 border-gray-300 rounded-md bg-white px-4 py-2 text-primText text-base focus:ring-2 focus:[#23314c] focus:outline-none hover:bg-gray-100">
+                  <option value="none">None</option>
+                  <option value="15">15%</option>
+                  <option value="20">20%</option>
+                  <option value="25">25%</option>
+                  <option value="30">30%</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-PrimBtn"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.707a1 1 0 011.414 0L10 11l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col bg-[#f7f7f7] gap-4 p-6 rounded-lg">
+            <div className="w-full flex flex-col justify-start gap-2">
+              <label
+                htmlFor="branch-name-en"
+                className="text-base font-semibold text-primText"
+              >
+                Add-ons Group Name
+                <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="branchNameEn"
+                id="branch-name-en"
+                className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
+                placeholder="Enter Name Here..."
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 p-4 bg-[#EDEDED] rounded-lg">
+              <div className="w-full flex flex-col justify-start gap-2">
+                <label
+                  htmlFor="branch-name-en"
+                  className="text-base font-semibold text-primText"
+                >
+                  Add-on Name
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="branchNameEn"
+                  id="branch-name-en"
+                  className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
+                  placeholder="Enter Name Here..."
+                />
+              </div>
+
+              <div className="w-full flex flex-col justify-start gap-2">
+                <label
+                  htmlFor="branch-name-en"
+                  className="text-base font-semibold text-primText"
+                >
+                  Add-on Price
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="branchNameEn"
+                  id="branch-name-en"
+                  className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
+                  placeholder="Enter Name Here..."
+                />
+              </div>
+
+              <div className="w-full flex flex-col justify-start gap-2">
+                <label
+                  htmlFor="branch-name-en"
+                  className="text-base font-semibold text-primText"
+                >
+                  Min Selection
+                  <span className="text-xs font-light ml-1">
+                    (if left mean 0)
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  name="branchNameEn"
+                  id="branch-name-en"
+                  className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
+                  placeholder="Enter Name Here..."
+                />
+              </div>
+
+              <div className="w-full flex flex-col justify-start gap-2">
+                <label
+                  htmlFor="branch-name-en"
+                  className="text-base font-semibold text-primText"
+                >
+                  Max Selection
+                </label>
+                <input
+                  type="text"
+                  name="branchNameEn"
+                  id="branch-name-en"
+                  className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
+                  placeholder="Enter Name Here..."
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-row gap-2">
+              <button
+                type="button"
+                className=" w-[200px] flex items-center gap-4 px-4 py-2 border-2 border-[#23314C] text-[#23314C] rounded-lg text-sm font-semibold focus:outline-none"
+              >
+                Save Add-ons Group
+              </button>
+
+              <button
+                type="button"
+                className=" w-[200px] flex items-center gap-4 px-4 py-2 border-2 border-[#B0438A] text-[#B0438A] rounded-lg text-sm font-semibold focus:outline-none"
+              >
+                <PlusIcon />
+                Add More Add-ons
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  );
+};
