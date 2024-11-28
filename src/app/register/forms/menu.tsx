@@ -58,7 +58,7 @@ interface props {
   onNext: () => void;
 }
 
-export default function Menu({onNext}: props) {
+export default function Menu({ onNext }: props) {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3;
 
@@ -158,7 +158,7 @@ export default function Menu({onNext}: props) {
   const handleSkipCategories = () => {
     setCategories([]);
     setItems([]);
-    setCurrentStep(3);
+    onNext();
   };
 
   const createMenu = () => {
@@ -169,7 +169,7 @@ export default function Menu({onNext}: props) {
 
   const [overlayVisible, setOverlayVisible] = useState(false);
 
-  const showOverlay = (e:  React.MouseEvent<HTMLButtonElement>) => {
+  const showOverlay = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setOverlayVisible(true);
   };

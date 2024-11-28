@@ -191,6 +191,10 @@ export default function Services({onNext}: props) {
 
   }
 
+  const handleSkip = (e: React.MouseEvent) => {
+    onNext();
+  }
+
   return (
     <form className="w-full flex flex-col gap-6 max-h-[900px]">
       <div className="w-full flex flex-col gap-8">
@@ -406,7 +410,7 @@ export default function Services({onNext}: props) {
             Confirm Services Information
           </button>
 
-          <button className="w-full lg:w-2/5 bg-white text-primText font-normal text-base lg:text-xl h-14 rounded-lg border-solid border-2 border-primText">
+          <button className="w-full lg:w-2/5 bg-white text-primText font-normal text-base lg:text-xl h-14 rounded-lg border-solid border-2 border-primText" onClick={(e)=>handleSkip(e)}>
             Skip for Now
           </button>
         </div>
