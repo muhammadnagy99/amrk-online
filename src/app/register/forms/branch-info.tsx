@@ -76,7 +76,6 @@ export default function BranchInfo({ onNext }: props) {
                 placeholder="Enter Name Here..."
                 value={branchNameEn}
                 onChange={(e) => setBranchNameEn(e.target.value)}
-                required
               />
             </div>
             <div className="w-full lg:w-1/2 flex flex-col justify-start gap-2">
@@ -95,7 +94,6 @@ export default function BranchInfo({ onNext }: props) {
                 placeholder="Enter Name Here..."
                 value={branchNameAr}
                 onChange={(e) => setBranchNameAr(e.target.value)}
-                required
               />
             </div>
           </div>
@@ -113,7 +111,6 @@ export default function BranchInfo({ onNext }: props) {
                 id="file-upload"
                 accept="image/*"
                 onChange={handleFileChange}
-                required
               />
               <label
                 htmlFor="file-upload"
@@ -156,7 +153,6 @@ export default function BranchInfo({ onNext }: props) {
               placeholder="Enter Full Address Here..."
               value={branchAddress}
               onChange={(e) => setBranchAddress(e.target.value)}
-              required
             />
           </div>
 
@@ -176,7 +172,7 @@ export default function BranchInfo({ onNext }: props) {
               placeholder="Enter Link Here..."
               value={googleMapsLink}
               onChange={(e) => setGoogleMapsLink(e.target.value)}
-              required
+              
             />
           </div>
         </div>
