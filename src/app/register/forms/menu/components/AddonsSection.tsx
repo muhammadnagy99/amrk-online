@@ -4,13 +4,16 @@ import { PlusIcon, Save } from "../icons";
 interface Addon {
   name: string;
   price: string;
-  minSelection: string;
-  maxSelection: string;
 }
 
 interface AddonGroup {
   name: string;
-  addons: Addon[];
+  minSelection: string;
+  maxSelection: string;
+  addons: {
+    name: string;
+    price: string;
+  }[];
 }
 
 interface AddonsSectionProps {
@@ -25,18 +28,18 @@ const AddonsSection: React.FC<AddonsSectionProps> = ({
   handleSaveItemWithAddon,
 }) => {
   const [addonGroupName, setAddonGroupName] = useState("");
+  const [addonMin, setAddonMin] = useState("");
+  const [addonMax, setAddonMax] = useState("");
+
   // Initialize with one default addon input
   const [newAddons, setNewAddons] = useState<Addon[]>([
-    { name: "", price: "", minSelection: "", maxSelection: "" },
+    { name: "", price: "" },
   ]);
   const [selectedAddonGroup, setSelectedAddonGroup] = useState<string>("");
 
   // Function to add a new addon input field
   const handleAddMoreAddons = () => {
-    setNewAddons([
-      ...newAddons,
-      { name: "", price: "", minSelection: "", maxSelection: "" },
-    ]);
+    setNewAddons([...newAddons, { name: "", price: "" }]);
   };
 
   // Handle input changes for new add-ons
@@ -53,14 +56,14 @@ const AddonsSection: React.FC<AddonsSectionProps> = ({
   const handleSaveAddonGroup = () => {
     const newAddonGroup: AddonGroup = {
       name: addonGroupName,
+      minSelection: addonMin,
+      maxSelection: addonMax,
       addons: newAddons,
     };
     handleAddAddonGroup(newAddonGroup);
     handleSaveItemWithAddon(newAddonGroup);
-    setNewAddons([
-      { name: "", price: "", minSelection: "", maxSelection: "" },
-    ]);
-    setAddonGroupName('');
+    setNewAddons([{ name: "", price: "" }]);
+    setAddonGroupName("");
   };
 
   const [isAddonsVisible, setIsAddonsVisible] = useState(false);
@@ -149,6 +152,45 @@ const AddonsSection: React.FC<AddonsSectionProps> = ({
                 />
               </div>
 
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 rounded-lg">
+                <div className="w-full flex flex-col justify-start gap-2">
+                  <label
+                    htmlFor={`min-selection`}
+                    className="text-sm lg:text-base font-semibold text-primText"
+                  >
+                    Min Selection
+                    <span className="text-xs font-light ml-1">
+                      (if left blank, set to 0)
+                    </span>
+                  </label>
+                  <input
+                    type="number"
+                    id={`min-selection`}
+                    className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
+                    placeholder="Enter Min Selection Here..."
+                    value={addonMin}
+                    onChange={(e) => setAddonMin(e.target.value)}
+                  />
+                </div>
+
+                <div className="w-full flex flex-col justify-start gap-2">
+                  <label
+                    htmlFor={`max-selection`}
+                    className="text-sm lg:text-base font-semibold text-primText"
+                  >
+                    Max Selection
+                  </label>
+                  <input
+                    type="number"
+                    id={`max-selection`}
+                    className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
+                    placeholder="Enter Max Selection Here..."
+                    value={addonMax}
+                    onChange={(e) => setAddonMax(e.target.value)}
+                  />
+                </div>
+              </div>
+
               {/* Render input fields for each addon */}
               {newAddons.map((addon, index) => (
                 <div
@@ -184,7 +226,7 @@ const AddonsSection: React.FC<AddonsSectionProps> = ({
                       Add-on Price
                       <span className="text-red-500">*</span>
                     </label>
-                    
+
                     <input
                       type="number"
                       id={`addon-price-${index}`}
@@ -193,47 +235,6 @@ const AddonsSection: React.FC<AddonsSectionProps> = ({
                       value={addon.price}
                       onChange={(e) =>
                         handleAddonChange(index, "price", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div className="w-full flex flex-col justify-start gap-2">
-                    <label
-                      htmlFor={`min-selection-${index}`}
-                      className="text-sm lg:text-base font-semibold text-primText"
-                    >
-                      Min Selection
-                      <span className="text-xs font-light ml-1">
-                        (if left blank, set to 0)
-                      </span>
-                    </label>
-                    <input
-                      type="number"
-                      id={`min-selection-${index}`}
-                      className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
-                      placeholder="Enter Min Selection Here..."
-                      value={addon.minSelection}
-                      onChange={(e) =>
-                        handleAddonChange(index, "minSelection", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  <div className="w-full flex flex-col justify-start gap-2">
-                    <label
-                      htmlFor={`max-selection-${index}`}
-                      className="text-sm lg:text-base font-semibold text-primText"
-                    >
-                      Max Selection
-                    </label>
-                    <input
-                      type="number"
-                      id={`max-selection-${index}`}
-                      className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
-                      placeholder="Enter Max Selection Here..."
-                      value={addon.maxSelection}
-                      onChange={(e) =>
-                        handleAddonChange(index, "maxSelection", e.target.value)
                       }
                     />
                   </div>

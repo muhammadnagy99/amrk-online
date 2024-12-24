@@ -15,8 +15,6 @@ interface Category {
 interface Addon {
   name: string;
   price: string;
-  minSelection: string;
-  maxSelection: string;
 }
 
 interface AddonGroup {
@@ -46,24 +44,35 @@ interface Items {
 
 interface AddonGroup {
   name: string;
+  minSelection: string;
+  maxSelection: string;
   addons: {
     name: string;
     price: string;
-    minSelection: string;
-    maxSelection: string;
   }[];
 }
 
 interface props {
+  restaurantId: string;
+  itemsData: Items[];
+  categoriesData: Category[];
+  onSubmit: (items: Items[], categories: Category[]) => void;
   onNext: () => void;
 }
 
-export default function Menu({ onNext }: props) {
+export default function Menu({
+  restaurantId,
+  onNext,
+  onSubmit,
+  itemsData,
+  categoriesData,
+}: props) {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3;
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [items, setItems] = useState<Items[]>([]);
+  const [categories, setCategories] = useState<Category[]>(categoriesData);
+  const [items, setItems] = useState<Items[]>(itemsData);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleNextStep = () => {
     if (currentStep < totalSteps) {
@@ -80,7 +89,6 @@ export default function Menu({ onNext }: props) {
   const handleCategoriesData = (newCategories: Category[]) => {
     // Step 1: Update the categories state
     setCategories(newCategories);
-
     // Step 2: Filter out items that are not in the new categories
     const updatedItems = items.filter((item) =>
       newCategories.some((category) => category.nameEn === item.category.nameEn)
@@ -100,8 +108,8 @@ export default function Menu({ onNext }: props) {
         updatedItems.push(blankItem);
       }
     });
-
     setItems(updatedItems);
+    onSubmit(items, categories);
   };
 
   const deleteCategoryByName = (categoryName: string) => {
@@ -109,6 +117,21 @@ export default function Menu({ onNext }: props) {
       (category) => category.nameEn !== categoryName
     );
     handleCategoriesData(updatedCategories);
+  };
+
+  const delItemByName = (itemName: string) => {
+    const updatedItems = items.map((category) => {
+      const filteredItems = category.items.filter(
+        (item) => item.nameEn !== itemName
+      );
+      return {
+        ...category,
+        items: filteredItems,
+      };
+    });
+    console.log(updatedItems);
+    setItems(updatedItems);
+    onSubmit(items, categories);
   };
 
   const handleItemsData = (newItem: ItemData) => {
@@ -160,11 +183,92 @@ export default function Menu({ onNext }: props) {
     setItems([]);
     onNext();
   };
+  const menuAPI = async () => {
+    // Helper function to handle empty fields
+    const handleEmptyField = (value: any, type: "number" | "string") => {
+      if (type === "number") {
+        return value !== undefined && value !== null && value !== ""
+          ? parseFloat(value)
+          : 0;
+      }
+      return value || "-";
+    };
 
-  const createMenu = () => {
-    const menu = items;
-    console.log(menu);
-    onNext();
+    try {
+      // Transform categories
+      const formattedCategories = categories.map((category) => ({
+        categoryNameEn: handleEmptyField(category.nameEn, "string"),
+        categoryNameAr: handleEmptyField(category.nameAr, "string"),
+      }));
+
+      // Transform items
+      const formattedItems = items.flatMap((itemGroup) =>
+        itemGroup.items.map((item) => ({
+          categoryName: handleEmptyField(itemGroup.category.nameEn, "string"),
+          itemNameEn: handleEmptyField(item.nameEn, "string"),
+          itemNameAr: handleEmptyField(item.nameAr, "string"),
+          price: handleEmptyField(item.price, "number"),
+          descriptionEn: handleEmptyField(item.descriptionEn, "string"),
+          descriptionAr: handleEmptyField(item.descriptionAr, "string"),
+          logo: item.file, // Assuming file upload URL will be added later
+          addonGroup: item.addon.map((addonGroup) => ({
+            name: handleEmptyField(addonGroup.name, "string"),
+            minSelection: handleEmptyField(addonGroup.minSelection, "number"),
+            maxSelection: handleEmptyField(addonGroup.maxSelection, "number"),
+            multiMax: handleEmptyField(addonGroup.maxSelection, "number"), // Assuming multiMax uses the same value as maxSelection
+            addons: addonGroup.addons.map((addon) => ({
+              name: handleEmptyField(addon.name, "string"),
+              price: handleEmptyField(addon.price, "number"),
+            })),
+          })),
+        }))
+      );
+
+      const requestBody = JSON.stringify({
+        restId: restaurantId,
+        Categories: formattedCategories,
+        Items: formattedItems,
+      });
+
+      console.log({
+        restId: restaurantId,
+        Categories: formattedCategories,
+        Items: formattedItems,
+      });
+      // const myHeaders = new Headers();
+      // myHeaders.append("Content-Type", "application/json");
+      // myHeaders.append("Accept", "application/json");
+
+      // const requestOptions = {
+      //   method: "POST",
+      //   headers: myHeaders,
+      //   body: requestBody,
+      //   redirect: "follow" as const,
+      // };
+
+      // const response = await fetch(
+      //   "https://api.amrk.app/external/menuSetup",
+      //   requestOptions
+      // );
+
+      //     if (!response.ok) {
+      //       console.error("API Error:", response.status, response.statusText);
+      //       return false;
+      //     }
+
+      //     const result = await response.json();
+      // console.log(result);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const createMenu = async () => {
+    setLoading(true);
+    onSubmit(items, categories);
+    await menuAPI();
+    setLoading(false);
+    // onNext();
   };
 
   const [overlayVisible, setOverlayVisible] = useState(false);
@@ -191,6 +295,7 @@ export default function Menu({ onNext }: props) {
           <ReviewMenu
             menuItems={items}
             onDeleteCategory={deleteCategoryByName}
+            onDeleteItem={delItemByName}
           />
         </Overlay>
 
@@ -216,6 +321,7 @@ export default function Menu({ onNext }: props) {
           <ReviewMenu
             menuItems={items}
             onDeleteCategory={deleteCategoryByName}
+            onDeleteItem={delItemByName}
           />
         )}
 
@@ -224,8 +330,9 @@ export default function Menu({ onNext }: props) {
             type="button"
             onClick={createMenu}
             className="bg-primText text-white text-base lg:text-xl font-bold h-14 rounded-lg"
+            disabled={loading}
           >
-            Confirm Menu
+            {loading ? "Creating Your Menu...." : "Confirm Menu"}
           </button>
         )}
 

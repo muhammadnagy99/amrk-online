@@ -56,42 +56,101 @@ const TextInput = ({
   />
 );
 
-interface props {
-  onNext: () => void;
+interface serviceData {
+  dineIn: {
+    key: boolean;
+    data: { tableNumber: string };
+  };
+  pickupOrders: { key: boolean; data: {} };
+  tableReservation: {
+    key: boolean;
+    data: { minGuests: string; maxGuests: string };
+  };
+  foodDelivery: {
+    key: boolean;
+    data: {
+      minOrderSize: string;
+      regionDataFees: { distance: string; fees: string }[];
+    };
+  };
 }
 
-export default function Services({onNext}: props) {
-  const [dineIn, setDineIn] = useState(false);
-  const [pickupOrders, setPickupOrders] = useState(false);
-  const [tableReservation, setTableReservation] = useState(false);
-  const [foodDelivery, setFoodDelivery] = useState(false);
-  const [minGuests, setMinGuests] = useState("");
-  const [maxGuests, setMaxGuests] = useState("");
-  const [minOrderSize, setMinOrderSize] = useState("");
-  const [regionDataFees, setRegionDataFees] = useState([
-    { distance: "", fees: "" },
-  ]);
+interface DayWorkingHours {
+  day: string;
+  isActive: boolean;
+  fromHour: string;
+  fromMinute: string;
+  toHour: string;
+  toMinute: string;
+}
 
-  const daysOfWeek = [
-    "Saturday",
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-  ];
+const daysOfWeek: string[] = [
+  "Saturday",
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+];
 
-  const [weekWorkingHours, setWeekWorkingHours] = useState(
-    daysOfWeek.map((day) => ({
-      day,
-      isActive: false,
-      fromHour: "",
-      fromMinute: "",
-      toHour: "",
-      toMinute: "",
-    }))
+interface props {
+  serviceInfo: serviceData;
+  workingHoursInfo: DayWorkingHours[];
+  onNext: () => void;
+  onSubmit: (
+    serviceInfo: serviceData,
+    weekingHoursInfo: DayWorkingHours[]
+  ) => Promise<void>;
+}
+
+export default function Services({
+  serviceInfo,
+  workingHoursInfo,
+  onNext,
+  onSubmit,
+}: props) {
+  const [dineIn, setDineIn] = useState<boolean>(serviceInfo.dineIn.key);
+  const [pickupOrders, setPickupOrders] = useState<boolean>(
+    serviceInfo.pickupOrders.key
   );
+  const [tableReservation, setTableReservation] = useState<boolean>(
+    serviceInfo.tableReservation.key
+  );
+  const [foodDelivery, setFoodDelivery] = useState<boolean>(
+    serviceInfo.foodDelivery.key
+  );
+  const [tableNumber, setTableNumber] = useState<string>(
+    serviceInfo.dineIn.data.tableNumber
+  );
+  const [minGuests, setMinGuests] = useState<string>(
+    serviceInfo.tableReservation.data.minGuests
+  );
+  const [maxGuests, setMaxGuests] = useState<string>(
+    serviceInfo.tableReservation.data.maxGuests
+  );
+  const [minOrderSize, setMinOrderSize] = useState<string>(
+    serviceInfo.foodDelivery.data.minOrderSize
+  );
+  const [regionDataFees, setRegionDataFees] = useState(
+    serviceInfo.foodDelivery.data.regionDataFees
+  );
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleTableNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setTableNumber(value);
+
+    if (Number(value) < 0) {
+      setError("Enter a valid number");
+    } else {
+      setError("");
+    }
+  };
+
+  const [weekWorkingHours, setWeekWorkingHours] =
+    useState<DayWorkingHours[]>(workingHoursInfo);
 
   const handleTimeChange = (day: string, field: string, value: string) => {
     setWeekWorkingHours((prevState) =>
@@ -124,7 +183,6 @@ export default function Services({onNext}: props) {
   };
 
   const handleNextClick = () => {
-
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
@@ -155,12 +213,19 @@ export default function Services({onNext}: props) {
     setRegionDataFees(updatedRegionFees);
   };
 
-
-  const handleSaveServiceData = (e: React.MouseEvent) => {
+  const handleSaveServiceData = async (e: React.MouseEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    const servicesData = {
-      dineIn: { key: dineIn, data: {} },
+    const servicesData: serviceData = {
+      dineIn: {
+        key: dineIn,
+        data: dineIn
+          ? {
+              tableNumber: tableNumber,
+            }
+          : { tableNumber: "0" },
+      },
       pickupOrders: { key: pickupOrders, data: {} },
       tableReservation: {
         key: tableReservation,
@@ -169,7 +234,7 @@ export default function Services({onNext}: props) {
               minGuests: minGuests,
               maxGuests: maxGuests,
             }
-          : { minGuests: null, maxGuests: null },
+          : { minGuests: "0", maxGuests: "0" },
       },
 
       foodDelivery: {
@@ -179,21 +244,24 @@ export default function Services({onNext}: props) {
               minOrderSize: minOrderSize,
               regionDataFees: regionDataFees,
             }
-          : { minOrderSize: null, regionDataFees: null },
+          : { minOrderSize: "0", regionDataFees: [] },
       },
     };
+    try {
+      // Wait for the parent function to complete
+      await onSubmit(servicesData, weekWorkingHours);
 
-    console.log(servicesData);
-
-    console.log(weekWorkingHours);
-
-    onNext();
-
-  }
+      // Proceed to the next step
+      onNext();
+    } catch (error) {
+      console.error("Error while saving service data:", error);
+      // Optionally handle the error (e.g., show an error message)
+    }
+  };
 
   const handleSkip = (e: React.MouseEvent) => {
     onNext();
-  }
+  };
 
   return (
     <form className="w-full flex flex-col gap-6 max-h-[900px]">
@@ -245,6 +313,33 @@ export default function Services({onNext}: props) {
                 />
               </div>
             </div>
+            {dineIn && (
+              <div
+                className={`flex flex-col bg-[#f7f7f7] gap-2 p-6 rounded-lg h-full`}
+              >
+                <div className="flex flex-col justify-start gap-2">
+                  <label
+                    htmlFor="tableNumber"
+                    className="text-sm lg:text-base font-semibold text-primText"
+                  >
+                    Number of your Dine-In tables
+                  </label>
+                  <input
+                    type="number"
+                    name="tableNumber"
+                    id="tableNumber"
+                    min={0}
+                    className={`w-full h-12 rounded-xl p-4 border border-solid ${
+                      error ? "border-red-500" : "border-[#23314c4c]"
+                    } focus:outline-none`}
+                    placeholder="Enter Number Here..."
+                    value={tableNumber}
+                    onChange={handleTableNumber}
+                  />
+                  {error && <p className="text-red-500 mt-2">{error}</p>}
+                </div>
+              </div>
+            )}
 
             {/* Conditionally Render Table Reservation Details */}
             {tableReservation && (
@@ -290,7 +385,10 @@ export default function Services({onNext}: props) {
 
                 {/* Dynamically render the region fee sections */}
                 {regionDataFees.map((_, index) => (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2" key={index}>
+                  <div
+                    className="grid grid-cols-1 lg:grid-cols-2 gap-2"
+                    key={index}
+                  >
                     <TextInput
                       id={`new-region-${index}-distance`}
                       name={`newRegionDistance-${index}`}
@@ -406,11 +504,24 @@ export default function Services({onNext}: props) {
         </button>
       ) : (
         <div className="w-full flex flex-col lg:flex-row gap-4">
-          <button className="w-full lg:w-3/5 bg-primText text-white text-base lg:text-xl font-bold h-14 rounded-lg" onClick={(e)=>handleSaveServiceData(e)}>
-            Confirm Services Information
+          <button
+            className={`w-full ${
+              loading ? "lg:w-full" : "lg:w-3/5"
+            } bg-primText text-white text-base lg:text-xl font-bold h-14 rounded-lg transition-all duration-300`}
+            onClick={(e) => handleSaveServiceData(e)}
+            disabled={loading}
+          >
+            {loading
+              ? "Submitting your information… Please wait"
+              : "Confirm Services Information"}
           </button>
 
-          <button className="w-full lg:w-2/5 bg-white text-primText font-normal text-base lg:text-xl h-14 rounded-lg border-solid border-2 border-primText" onClick={(e)=>handleSkip(e)}>
+          <button
+            className={`${
+              loading ? "hidden" : ""
+            } w-full lg:w-2/5 bg-white text-primText font-normal text-base lg:text-xl h-14 rounded-lg border-solid border-2 border-primText`}
+            onClick={(e) => handleSkip(e)}
+          >
             Skip for Now
           </button>
         </div>

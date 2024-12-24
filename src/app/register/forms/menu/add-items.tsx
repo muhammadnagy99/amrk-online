@@ -15,7 +15,12 @@ interface Addon {
 
 interface AddonGroup {
   name: string;
-  addons: Addon[];
+  minSelection: string;
+  maxSelection: string;
+  addons: {
+    name: string;
+    price: string;
+  }[];
 }
 
 interface ItemObject {

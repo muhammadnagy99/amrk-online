@@ -1,4 +1,12 @@
 import React, { useState } from "react";
+import { PaymentAPI } from "../payment-api";
+
+interface Dine {
+  isChecked: boolean;
+  tips: number[];
+  selectedTip: string;
+  minTip: number;
+}
 
 interface bankData {
   bankHolderName: string;
@@ -9,17 +17,25 @@ interface bankData {
 }
 
 interface props {
-  onChange: (data: bankData) => void
+  accept: boolean;
+  dineIn: Dine;
+  bankData: bankData;
+  restaurantId: string;
+  branchId: string;
+  onChange: (data: bankData) => void;
 }
 
-export default function LegalInfo({ onChange }: props) {
-  const [formData, setFormData] = useState({
-    bankHolderName: "",
-    bankName: "",
-    iban: "",
-    vatNumber: "",
-    acceptTerms: false,
-  });
+export default function LegalInfo({
+  accept,
+  dineIn,
+  bankData,
+  restaurantId,
+  branchId,
+  onChange,
+}: props) {
+  const [formData, setFormData] = useState(bankData);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -29,16 +45,30 @@ export default function LegalInfo({ onChange }: props) {
     }));
   };
 
-  const handleSubmit = (e: React.MouseEvent) => {
+  const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault();
+    setLoading(true);
     console.log("Form submitted:", formData);
-    onChange(formData);
+    const success = await PaymentAPI(
+      restaurantId,
+      branchId,
+      accept,
+      dineIn,
+      bankData
+    );
+    if (success){
+      setErrorMessage(null);
+      onChange(formData);
+    } 
+    else{
+      setLoading(false);
+      setErrorMessage("Something went wrong, try again later");
+    } 
+    
   };
 
   return (
-    <form
-      className="flex flex-col w-full gap-5 overflow-y-auto custom-scrollbar justify-between"
-    >
+    <form className="flex flex-col w-full gap-5 overflow-y-auto custom-scrollbar justify-between">
       <h3 className="text-sm lg:text-xl font-semibold text-primText top-0">
         Enter your legal payment information
       </h3>
@@ -83,7 +113,10 @@ export default function LegalInfo({ onChange }: props) {
         </div>
 
         <div className="w-full flex flex-col justify-start gap-2">
-          <label htmlFor="iban" className="text-sm lg:text-base font-medium text-primText">
+          <label
+            htmlFor="iban"
+            className="text-sm lg:text-base font-medium text-primText"
+          >
             Account IBAN
             <span className="text-red-500">*</span>
           </label>
@@ -148,7 +181,10 @@ export default function LegalInfo({ onChange }: props) {
           onChange={handleChange}
           className="lg:w-5 lg:h-5 w-3 h-3 border-gray-300 rounded text-primText focus:to-blue-950"
         />
-        <label htmlFor="terms" className="text-primText font-medium text-sm lg:text-base">
+        <label
+          htmlFor="terms"
+          className="text-primText font-medium text-sm lg:text-base"
+        >
           Accept payment
           <a
             href="#"
@@ -163,8 +199,13 @@ export default function LegalInfo({ onChange }: props) {
         className="w-full bg-primText text-white text-base lg:text-xl font-bold h-14 rounded-lg"
         onClick={handleSubmit}
       >
-        Confirm Payment Information
+        {loading
+          ? "Submitting your information… Please wait"
+          : "Confirm Payment Information"}
       </button>
+      {errorMessage && (
+        <p className="text-red-500 text-sm md:text-base mt-2">{errorMessage}</p>
+      )}
     </form>
   );
 }

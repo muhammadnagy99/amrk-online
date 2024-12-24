@@ -9,13 +9,16 @@ interface Category {
 interface Addon {
   name: string;
   price: string;
-  minSelection: string;
-  maxSelection: string;
 }
 
 interface AddonGroup {
   name: string;
-  addons: Addon[];
+  minSelection: string;
+  maxSelection: string;
+  addons: {
+    name: string;
+    price: string;
+  }[];
 }
 
 interface ItemObject {
@@ -37,9 +40,10 @@ interface Items {
 interface ReviewMenuProps {
   menuItems: Items[];
   onDeleteCategory: (categoryName: string) => void;
+  onDeleteItem: (itemName: string) => void
 }
 
-export default function ReviewMenu({ menuItems, onDeleteCategory }: ReviewMenuProps) {
+export default function ReviewMenu({ menuItems, onDeleteCategory, onDeleteItem }: ReviewMenuProps) {
   return (
     <div className="flex flex-col w-full h-[500px] gap-5 p-4 overflow-y-auto custom-scrollbar justify-between ">
       <h3 className="text-xl font-semibold text-primText top-0">
@@ -57,6 +61,7 @@ export default function ReviewMenu({ menuItems, onDeleteCategory }: ReviewMenuPr
               price: `${itemObj.price} SAR`
             }))} 
             onDeleteCategory={onDeleteCategory}
+            onDeleteItem={onDeleteItem}
           />
         ))}
       </div>

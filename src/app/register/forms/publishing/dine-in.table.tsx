@@ -23,27 +23,6 @@ export default function DineInTables({tableRows}: TableLinks) {
           Manage your tables QR codes & links
         </h3>
 
-        <div
-          className={`flex flex-col bg-[#f7f7f7] gap-2 p-6 rounded-lg h-full`}
-        >
-          <div className="flex flex-col justify-start gap-2">
-            <label
-              htmlFor="tableNumber"
-              className="text-sm lg:text-base font-semibold text-primText"
-            >
-              Number of your Dine-In tables
-            </label>
-            <input
-              type="number"
-              name="tableNumber"
-              id="tableNumber"
-              min={0}
-              className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
-              placeholder="Enter Number Here..."
-            />
-          </div>
-        </div>
-
         <TableList tableRows={tableRows} />
       </div>
     </div>

@@ -16,6 +16,10 @@ interface CountryOption {
 }
 
 interface props {
+  restaurantId: string;
+  restaurantMobile: string;
+  selectCountry: CountryOption | null;
+  onSubmit: (rest_mobile: string, selectedCountry: CountryOption | null) => void;
   onNext: () => void;
 }
 
@@ -46,12 +50,11 @@ const customStyles: StylesConfig<CountryOption, false> = {
   }),
 };
 
-export default function MobileInput({ onNext }: props) {
-  const [selectedCountry, setSelectedCountry] = useState<CountryOption | null>({
-    value: "SA",
-    label: "Saudi Arabia",
-  });
-  const [phoneNumber, setPhoneNumber] = useState<string>("+966");
+export default function MobileInput({ restaurantId, restaurantMobile, selectCountry, onSubmit, onNext }: props) {
+  const [selectedCountry, setSelectedCountry] = useState<CountryOption | null>(selectCountry);
+  const [phoneNumber, setPhoneNumber] = useState<string>(restaurantMobile);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const countryOptions: CountryOption[] = Object.entries(
     countries.getNames("en")
@@ -85,10 +88,72 @@ export default function MobileInput({ onNext }: props) {
     }
   };
 
-  const handleNext = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleNext = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    const phoneWithoutCode = phoneNumber.replace(/^\+\d{1,3}/, "");
+    
+    if (!phoneWithoutCode.trim()) {
+      setErrorMessage("Please enter your mobile number.");
+      return;
+    }
 
-    onNext();
+    if (!/^\d+$/.test(phoneWithoutCode)) {
+      setErrorMessage("Please enter a valid mobile number.");
+      return false;
+    }
+
+    if (phoneWithoutCode.length < 9) {
+      setErrorMessage("Please enter a valid mobile number.");
+      return false;
+    }
+
+    setLoading(true);
+
+    setErrorMessage(null);
+    onSubmit(phoneNumber, selectedCountry); 
+    // to be deleted
+    onNext();   
+    // to be deleted
+
+    // const myHeaders = new Headers();
+    // myHeaders.append("Accept", "application/json");
+    // myHeaders.append("Content-Type", "application/json");
+
+    // const raw = JSON.stringify({
+    //   mobileNum: phoneNumber,
+    //   rest_id: restaurantId,
+    // });
+
+    // const requestOptions: RequestInit = {
+    //   method: "POST",
+    //   headers: myHeaders,
+    //   body: raw,
+    //   redirect: "follow",
+    // };
+
+    // try {
+    //   const response = await fetch(
+    //     "https://api.amrk.app/external/addMobileNumber",
+    //     requestOptions
+    //   );
+
+    //   if (response.ok) {
+    //     const result = await response.json();
+    //     if (result.success) {
+    //       onSubmit(phoneNumber);
+    //       onNext();
+    //     } else {
+    //       setErrorMessage("Failed to add mobile number. Please try again.");
+    //     }
+    //   } else {
+    //     setErrorMessage("Something went wrong. Please try again.");
+    //   }
+    // } catch (error) {
+    //   console.error("Error making POST request:", error);
+    //   setErrorMessage("Network error. Please check your connection.");
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   return (
@@ -100,7 +165,10 @@ export default function MobileInput({ onNext }: props) {
         </h2>
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="phone" className="text-sm lg:text-xl font-medium text-primText">
+          <label
+            htmlFor="phone"
+            className="text-sm lg:text-xl font-medium text-primText"
+          >
             Phone Number
           </label>
           <div className="flex flex-col md:flex-row w-full justify-between gap-2">
@@ -121,7 +189,7 @@ export default function MobileInput({ onNext }: props) {
               }
             </div>
             <input
-              className="w-full md:w-8/12 h-[40px] border border-solid border-[#23314c4c] focus:outline-none rounded-[12px] p-2"
+              className={`w-full md:w-8/12 h-[40px] border border-solid ${errorMessage? 'border-red-500' : 'border-[#23314c4c]'} focus:outline-none rounded-[12px] p-2`}
               type="tel"
               id="phone"
               name="phone"
@@ -131,14 +199,18 @@ export default function MobileInput({ onNext }: props) {
               onChange={handleInputChange}
             />
           </div>
+          {errorMessage && (
+            <p className="text-red-500 text-sm">{errorMessage}</p>
+          )}
         </div>
       </div>
 
       <button
         className="w-full bg-primText text-white text-base lg:text-xl font-bold h-14 rounded-lg"
         onClick={(e) => handleNext(e)}
+        disabled={loading}
       >
-        Send Verification Code
+        {loading ? "Sending..." : "Send Verification Code"}
       </button>
     </form>
   );

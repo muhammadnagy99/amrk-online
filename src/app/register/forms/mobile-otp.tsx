@@ -1,21 +1,37 @@
 "use client";
-
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 interface props {
+  rest_mobile: string;
+  restaurantId: string;
   onNext: () => void;
 }
 
-export default function MobileOtp({onNext}: props) {
+export default function MobileOtp({
+  rest_mobile,
+  restaurantId,
+  onNext,
+}: props) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [otp, setOtp] = useState<number | string>("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [sucessMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loadingMsg, setLoadingMsg] = useState<string>('Verify')
 
   const handleInput = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
     const value = e.target.value;
-    if (value && value.length === 1 && index < inputRefs.current.length - 1) {
-      inputRefs.current[index + 1]?.focus();
+    if (/^\d$/.test(value)) {
+      if (value && value.length === 1 && index < inputRefs.current.length - 1) {
+        inputRefs.current[index + 1]?.focus();
+      }
+
+      const newOtp = otp.toString().split("");
+      newOtp[index] = value;
+      setOtp(Number(newOtp.join("")));
     }
   };
 
@@ -24,15 +40,109 @@ export default function MobileOtp({onNext}: props) {
     index: number
   ) => {
     if (e.key === "Backspace" && !e.currentTarget.value && index > 0) {
-      // Move to the previous input
       inputRefs.current[index - 1]?.focus();
     }
   };
 
-  const handleNext = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleNext = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    if (otp.toString().length <= 0) {
+      setErrorMessage("Please enter the OTP.");
+      return;
+    }
+    
+    if (otp.toString().length !== 4) {
+      setErrorMessage("Please enter all 4 digits of the OTP.");
+      return;
+    }
+    
+    setLoading(true); // to be deleted
+    setLoadingMsg('Verifying....') //to be deleted
+    onNext(); // to be deleted
 
-    onNext();
+    // const myHeaders = new Headers();
+    // myHeaders.append("Accept", "application/json");
+    // myHeaders.append("Content-Type", "application/json");
+
+    // const raw = JSON.stringify({
+    //   otpCode: otp,
+    //   rest_id: restaurantId,
+    // });
+
+    // const requestOptions: RequestInit = {
+    //   method: "POST",
+    //   headers: myHeaders,
+    //   body: raw,
+    //   redirect: "follow",
+    // };
+
+    // try {
+    //   const response = await fetch("https://api.amrk.app/external/verifyOTP", requestOptions);
+    //   const result = await response.json();
+
+    //   if (response.ok) {
+    //     console.log(result);
+    //     onNext();
+    //   } else {
+    //     console.error("Verification failed:", result);
+    //     setErrorMessage("OTP verification failed, please try again.");
+    //   }
+    // } catch (error) {
+    //   console.error("Error during OTP verification:", error);
+    //   setErrorMessage("There was an error while verifying the OTP. Please try again.");
+    // } finally {
+    //   setLoading(false);
+    // }
+  };
+
+  const handleResendOTP = async () => {
+    if(loading) return;
+    setLoading(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+    setLoadingMsg('Sending New OTP...');
+  
+    // const myHeaders = new Headers();
+    // myHeaders.append("Content-Type", "application/json");
+    // myHeaders.append("Accept", "application/json");
+
+    // const raw = JSON.stringify({
+    //   mobileNum: rest_mobile,
+    //   rest_id: restaurantId,
+    // });
+
+    // const requestOptions: RequestInit = {
+    //   method: "POST",
+    //   headers: myHeaders,
+    //   body: raw,
+    //   redirect: "follow",
+    // };
+
+    // try {
+    //   const response = await fetch(
+    //     "https://api.amrk.app/external/resendOTP",
+    //     requestOptions
+    //   );
+    //   const result = await response.json();
+
+    //   if (response.ok) {
+    //     console.log(result);
+    //     setLoadingMsg('Verify');
+    //     setSuccessMessage("OTP has been resent! Please check your phone.");
+    //   } else {
+    //     console.error("Resend OTP failed:", result);
+    //     setErrorMessage("Failed to resend OTP. Please try again.");
+    //   }
+    // } catch (error) {
+    //   console.error("Error during OTP resend:", error);
+    //   setErrorMessage(
+    //     "There was an error while resending the OTP. Please try again."
+    //   );
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   return (
@@ -45,7 +155,7 @@ export default function MobileOtp({onNext}: props) {
 
         <h3 className="text-primText text-sm lg:text-2xl font-normal text-center">
           We’ve sent a code to
-          <span className="text-PrimBtn font-bold ml-1">+966 xxx xxx xxx</span>
+          <span className="text-PrimBtn font-bold ml-1">{rest_mobile}</span>
         </h3>
 
         <div className="flex items-center justify-center gap-4">
@@ -70,15 +180,26 @@ export default function MobileOtp({onNext}: props) {
               />
             ))}
         </div>
+        {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+        {sucessMessage && <p className="text-green-500 text-sm">{sucessMessage}</p>}
       </div>
 
-      <button className="w-full bg-primText text-white text-base lg:text-xl font-bold h-14 rounded-lg" onClick={(e) => handleNext(e)}>
-        Verify
+      <button
+        className="w-full bg-primText text-white text-base lg:text-xl font-bold h-14 rounded-lg"
+        onClick={(e) => handleNext(e)}
+        disabled={loading}
+      >
+        {loadingMsg}
       </button>
 
-      <p className="text-PrimBtn font-light text-sm text-center">  
+      <p className="text-PrimBtn font-light text-sm text-center">
         Didn’t receive code?
-        <span className="font-bold ml-1" onClick={() => {}}>Resend</span> {/**handle the send otp function */}
+        <span
+          className="font-bold ml-1 cursor-pointer"
+          onClick={handleResendOTP}
+        >
+          Resend
+        </span>
       </p>
     </form>
   );

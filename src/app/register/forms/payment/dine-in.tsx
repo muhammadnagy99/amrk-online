@@ -9,20 +9,20 @@ interface Dine{
   minTip:number
 }
 interface Props {
+  dineData: Dine
   onChange: (Dine: Dine) => void;  // Ensure the name matches here
 }
-export default function DineIn({onChange}: Props) {
-  const [isChecked, setIsChecked] = useState(false);
-
+export default function DineIn({dineData, onChange}: Props) {
+  const [isChecked, setIsChecked] = useState(dineData.isChecked);
   // Separate states for each tip input
-  const [tip1, setTip1] = useState<string>("");
-  const [tip2, setTip2] = useState<string>("");
-  const [tip3, setTip3] = useState<string>("");
-  const [tip4, setTip4] = useState<string>("");
-  const [minTip, setMinTip] = useState<string>("");
-  const [selectedTip, setSelectedTip] = useState<string>("none");
+  const [tip1, setTip1] = useState<string>(  dineData?.tips?.[0] ? dineData.tips[0].toString() : '');
+  const [tip2, setTip2] = useState<string>(  dineData?.tips?.[1] ? dineData.tips[1].toString() : '');
+  const [tip3, setTip3] = useState<string>(  dineData?.tips?.[2] ? dineData.tips[2].toString() : '');
+  const [tip4, setTip4] = useState<string>(  dineData?.tips?.[3] ? dineData.tips[3].toString() : '');
+  const [minTip, setMinTip] = useState<string>(dineData.minTip.toString());
+  const [selectedTip, setSelectedTip] = useState<string>(dineData.selectedTip);
 
-  const [tips, updateTips] = useState<number[]>([]);
+  const [tips, updateTips] = useState<number[]>(dineData.tips);
 
   // Handle checkbox toggle
   const handleToggleChange = () => {
@@ -140,7 +140,6 @@ export default function DineIn({onChange}: Props) {
                     value={selectedTip}
                     onChange={handleSelectChange}
                   >
-                    <option value="none">None</option>
                     {tips.map((key, index) => {
                       return (
                         <option key={index} value={key}>

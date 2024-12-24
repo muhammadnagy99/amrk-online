@@ -14,9 +14,10 @@ interface CategoryRowProps {
   category: string;
   dropdownItems: DropdownItem[];
   onDeleteCategory: (categoryName: string) => void;
+  onDeleteItem: (itemName: string) => void
 }
 
-export default function CategoryRow({ category, dropdownItems, onDeleteCategory }: CategoryRowProps) {
+export default function CategoryRow({ category, dropdownItems, onDeleteCategory, onDeleteItem }: CategoryRowProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [items, setItems] = useState(dropdownItems); // Track the state of dropdown items
 
@@ -44,6 +45,15 @@ export default function CategoryRow({ category, dropdownItems, onDeleteCategory 
     reorderedItems.splice(index, 0, draggedItem);
 
     setItems(reorderedItems); // Update the items order
+  };
+
+  const handleItemDelete = (itemName: string) => {
+    // Update local state
+    const updatedItems = items.filter((item) => item.name !== itemName);
+    setItems(updatedItems);
+
+    // Call parent delete function
+    onDeleteItem(itemName);
   };
 
   return (
@@ -89,7 +99,7 @@ export default function CategoryRow({ category, dropdownItems, onDeleteCategory 
               </div>
 
               <div className="flex flex-row gap-4 justify-center items-center">
-                <p className="cursor-pointer" aria-labelledby="delete icon">
+                <p className="cursor-pointer" aria-labelledby="delete icon" onClick={() => handleItemDelete(item.name)}>
                   <Delete_ico />
                 </p>
               </div>

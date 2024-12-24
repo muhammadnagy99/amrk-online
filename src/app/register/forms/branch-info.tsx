@@ -1,34 +1,51 @@
 "use client";
 
 import { useState, useRef } from "react";
+import MapComponent from "./google-map";
 
+interface branchData {
+    branchNameEn: string
+    branchNameAr: string
+    branchLoc: {
+      lat: number;
+      lng: number;
+    };
+}
 interface props {
+  branchInfo: branchData;
   onNext: () => void;
+  onSubmit: (branchInfo: branchData) => void;
 }
 
-export default function BranchInfo({ onNext }: props) {
-  const [branchNameEn, setBranchNameEn] = useState("");
-  const [branchNameAr, setBranchNameAr] = useState("");
-  const [branchAddress, setBranchAddress] = useState("");
-  const [googleMapsLink, setGoogleMapsLink] = useState("");
+export default function BranchInfo({ branchInfo, onSubmit, onNext }: props) {
+  const [branchNameEn, setBranchNameEn] = useState<string>(branchInfo.branchNameEn);
+  const [branchNameAr, setBranchNameAr] = useState<string>(branchInfo.branchNameAr);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [uploadLabel, setUploadLabel] = useState("Upload Branch Logo");
   const [filePreview, setFilePreview] = useState<string | null>(null);
-
+  const [lat, setLat] = useState<number>(branchInfo.branchLoc.lat);
+  const [lng, setLng] = useState<number>(branchInfo.branchLoc.lng);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    const formData = {
-      branchNameEn,
-      branchNameAr,
-      branchAddress,
-      googleMapsLink,
-      logoFile,
-    };
-    onNext();
-    console.log(formData);
+    setLoading(true);
+    setTimeout(() => {
+      const formData: branchData = {
+        branchNameEn,
+        branchNameAr,
+        branchLoc: {
+          lat: lat,
+          lng: lng,
+        },
+      };
+  
+      onSubmit(formData);
+      onNext();
+      setLoading(false);
+    }, 1000);
   };
 
   // Handle file input change
@@ -47,8 +64,18 @@ export default function BranchInfo({ onNext }: props) {
     }
   };
 
+  const handleAddressSelect = (addressData: { lat: number; lng: number; address: string }) => {
+    const { lat, lng } = addressData;
+    setLat(lat);
+    setLng(lng);
+  };
+
+
   return (
-    <form className="w-full flex flex-col gap-4 lg:gap-8" onSubmit={handleSubmit}>
+    <form
+      className="w-full flex flex-col gap-4 lg:gap-8"
+      onSubmit={handleSubmit}
+    >
       <div className="w-full flex flex-col gap-5 lg:gap-10">
         <h2 className="text-primText text-base lg:text-2xl font-bold text-start w-full relative">
           Branch Information
@@ -138,42 +165,14 @@ export default function BranchInfo({ onNext }: props) {
           </div>
 
           <div className="w-full flex flex-col justify-start gap-2">
-            <label
+          <label
               htmlFor="branch-address"
               className="text-sm lg:text-xl font-semibold text-primText"
             >
-              Branch Address
+              Pick up your address
               <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              name="branchAddress"
-              id="branch-address"
-              className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
-              placeholder="Enter Full Address Here..."
-              value={branchAddress}
-              onChange={(e) => setBranchAddress(e.target.value)}
-            />
-          </div>
-
-          <div className="w-full flex flex-col justify-start gap-2">
-            <label
-              htmlFor="google-maps-link"
-              className="text-sm lg:text-xl font-semibold text-primText"
-            >
-              Google Maps Link
-              <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="googleMapsLink"
-              id="google-maps-link"
-              className="w-full h-12 rounded-xl p-4 border border-solid border-[#23314c4c] focus:outline-none"
-              placeholder="Enter Link Here..."
-              value={googleMapsLink}
-              onChange={(e) => setGoogleMapsLink(e.target.value)}
-              
-            />
+            <MapComponent onAddressSelect={handleAddressSelect} currentAddress={branchInfo.branchLoc} />
           </div>
         </div>
       </div>
@@ -181,8 +180,9 @@ export default function BranchInfo({ onNext }: props) {
       <button
         type="submit"
         className="w-full bg-primText text-white text-base lg:text-xl font-bold h-14 rounded-lg"
+        disabled={loading}
       >
-        Confirm Information
+        {loading? 'Submitting your information… Please wait': 'Confirm Information'}
       </button>
     </form>
   );
