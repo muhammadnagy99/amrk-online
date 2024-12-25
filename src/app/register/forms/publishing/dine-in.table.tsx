@@ -1,6 +1,6 @@
 import TableList from "./components/tables-list";
 
-type TableRowData = {
+export type TableRowData = {
   tableId: string;
   tableName: string;
   menuLink: string;
@@ -8,7 +8,7 @@ type TableRowData = {
   qrSrcBaseUrl: string;
 };
 
-type TableLinks = {
+export type TableLinks = {
     tableRows: TableRowData[];
 };
 

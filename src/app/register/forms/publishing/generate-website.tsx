@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-
-export default function GenerateWebsite() {
+interface props{
+  branchId: string;
+}
+export default function GenerateWebsite({branchId}: props) {
   const [isChecked, setIsChecked] = useState(false);
 
   const handleToggleChange = () => {
@@ -68,9 +70,9 @@ export default function GenerateWebsite() {
               click the button down below to preview or edit your website.
             </p>
 
-            <button className="py-2 px-4 bg-[#348ef4] text-white rounded-lg" onClick={(e) => e.preventDefault()}>
+            <a href={`https://www.amrk.online?id=${branchId}`} className="py-2 px-4 bg-[#348ef4] text-white rounded-lg" target="_blank">
             View Website
-            </button>
+            </a>
           </div>
         </div>
       </div>

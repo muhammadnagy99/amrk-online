@@ -1,35 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ProgressBar from "./progress-bar";
 import GenerateWebsite from "./publishing/generate-website";
-import OnlineLinks from "./publishing/online-service-links";
-import DineInTables from "./publishing/dine-in.table";
+import OnlineLinks, {
+  OnlineLinksProps,
+  ServiceRowData,
+} from "./publishing/online-service-links";
+import DineInTables, {
+  TableLinks,
+  TableRowData,
+} from "./publishing/dine-in.table";
+import { fetchServiceRows } from "./online-links";
+import { fetchAndTransformTables } from "./table-links";
 
-const menuOptions = [
-  { id: 1, name: "Breakfast", link: "https://amrk.cloud/#MainView?mntype=1" },
-  { id: 2, name: "Lunch", link: "https://amrk.cloud/#MainView?mntype=2" },
-  { id: 3, name: "Dinner", link: "https://amrk.cloud/#MainView?mntype=3" },
-  { id: 4, name: "Drinks", link: "https://amrk.cloud/#MainView?mntype=4" },
-];
+const menuOptions = [{ id: 1, name: "Breakfast", link: "" }];
 
 const qrSizes = [
-  { label: "Small", value: 120 },
-  { label: "Medium", value: 150 },
-  { label: "Large", value: 200 },
+  { label: "Small", value: 200 },
+  { label: "Medium", value: 300 },
+  { label: "Large", value: 400 },
 ];
 
-const qrSrcBaseUrl = "/api/qr";
+const qrSrcBaseUrl = "";
 
 const serviceRows = [
   {
-    serviceName: "Pickup",
+    serviceName: "",
     menuOptions,
     qrSizes,
     qrSrcBaseUrl,
   },
   {
-    serviceName: "Dine-In",
+    serviceName: "",
     menuOptions,
     qrSizes,
     qrSrcBaseUrl,
@@ -40,7 +43,7 @@ const testData = [
   {
     tableId: "1",
     tableName: "Table 1",
-    menuLink: "https://example.com/menu/table1",
+    menuLink: "",
     qrSizes: [
       { label: "Small", value: 120 },
       { label: "Medium", value: 150 },
@@ -51,7 +54,7 @@ const testData = [
   {
     tableId: "2",
     tableName: "Table 2",
-    menuLink: "https://example.com/menu/table2",
+    menuLink: "",
     qrSizes: [
       { label: "Small", value: 120 },
       { label: "Medium", value: 150 },
@@ -62,23 +65,75 @@ const testData = [
   {
     tableId: "3",
     tableName: "Table 3",
-    menuLink: "https://example.com/menu/table3",
+    menuLink: "",
     qrSizes: [
       { label: "Small", value: 120 },
       { label: "Medium", value: 150 },
       { label: "Large", value: 200 },
     ],
-    qrSrcBaseUrl: "/api/qr",
+    qrSrcBaseUrl: "",
   },
 ];
 
 interface props {
+  restaurantId: string;
+  branchId: string;
   onNext: () => void;
 }
 
-export default function Publishing({ onNext }: props) {
+export default function Publishing({ restaurantId, branchId, onNext }: props) {
   const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const totalSteps = 3;
+
+  const [onlineServicesLinks, setOnlineServicesLinks] =
+    useState<ServiceRowData[]>(serviceRows);
+  const [tableLinks, setTableLinks] = useState<TableRowData[]>(testData);
+
+  useEffect(() => {
+    setError(false);
+    const fetchData = async () => {
+      try {
+        const requestOnlineService = await fetchServiceRows(branchId);
+
+        if (requestOnlineService.success) {
+          setOnlineServicesLinks(requestOnlineService.serviceRows);
+          console.log(
+            "Online Services Links:",
+            requestOnlineService.serviceRows
+          );
+        } else {
+          console.error("Error fetching services:", requestOnlineService.error);
+        }
+
+        const requestTableLinks = await fetchAndTransformTables(branchId);
+
+        if (requestTableLinks.success) {
+          setTableLinks(requestTableLinks.data);
+          console.log("Transformed Data:", requestTableLinks.data);
+        } else {
+          console.error(
+            "Error:",
+            requestTableLinks.message,
+            requestTableLinks.error
+          );
+        }
+
+        if (requestOnlineService.success && requestTableLinks.success) {
+          setLoading(false);
+        } else {
+          setLoading(false);
+          setError(true);
+        }
+      } catch (error) {
+        console.error("Error during data fetch:", error);
+        setLoading(false); // Stop loading even if an error occurs
+      }
+    };
+
+    fetchData();
+  }, [branchId]);
 
   const handleNextStep = () => {
     if (currentStep < totalSteps) {
@@ -105,11 +160,36 @@ export default function Publishing({ onNext }: props) {
           <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
         </div>
 
-        {currentStep === 1 && <GenerateWebsite />}
-        {currentStep === 2 && <OnlineLinks serviceRows={serviceRows} />}
-        {currentStep === 3 && <DineInTables tableRows={testData} />}
+        {loading && !error && (
+          <div className="flex flex-col items-center justify-center h-[200px] md:h-[400px] gap-4">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primText"></div>
+            <p className="text-center font-medium">
+              We are working on your Data.
+              <br />
+              Please Wait....
+            </p>
+          </div>
+        )}
 
-        {currentStep < totalSteps && (
+        {error && (
+          <p className="text-center font-medium text-red-500">
+           Something went wrong.
+            <br />
+            Try again later.
+          </p>
+        )}
+
+        {!loading && !error && currentStep === 1 && (
+          <GenerateWebsite branchId={branchId} />
+        )}
+        {!loading && !error && currentStep === 2 && (
+          <OnlineLinks serviceRows={onlineServicesLinks} />
+        )}
+        {!loading && !error && currentStep === 3 && (
+          <DineInTables tableRows={tableLinks} />
+        )}
+
+        {!loading && !error && currentStep < totalSteps && (
           <button
             type="button"
             onClick={handleNextStep}
@@ -119,7 +199,7 @@ export default function Publishing({ onNext }: props) {
           </button>
         )}
 
-        {currentStep === totalSteps && (
+        {!loading && !error && currentStep === totalSteps && (
           <button
             type="button"
             onClick={confirmPublish}
@@ -130,7 +210,7 @@ export default function Publishing({ onNext }: props) {
         )}
 
         <div className="w-full flex justify-between items-end">
-          {currentStep > 1 && (
+          {!loading && !error && currentStep > 1 && (
             <button
               type="button"
               onClick={handlePreviousStep}
@@ -154,7 +234,7 @@ export default function Publishing({ onNext }: props) {
             </button>
           )}
 
-          {currentStep < totalSteps && (
+          {!loading && !error && currentStep < totalSteps && (
             <button
               type="button"
               onClick={handleNextStep}

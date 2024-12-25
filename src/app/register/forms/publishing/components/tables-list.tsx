@@ -1,5 +1,7 @@
+import { useRef, useState } from "react";
 import Line from "./line";
-import TableRow from "./table-row";
+import TableRow, { TableRowRef } from "./table-row";
+import React from "react";
 
 type TableRowData = {
   tableId: string;
@@ -14,6 +16,41 @@ type TableLinks = {
 };
 
 export default function TableList({ tableRows }: TableLinks) {
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const rowRefs = useRef<Record<string, React.RefObject<TableRowRef>>>(
+    tableRows.reduce(
+      (acc, row) => ({
+        ...acc,
+        [row.tableId]: React.createRef(),
+      }),
+      {}
+    )
+  );
+  
+  // Handle individual row selection
+  const handleRowSelection = (tableId: string, isSelected: boolean) => {
+    setSelectedRows((prev) =>
+      isSelected ? [...prev, tableId] : prev.filter((id) => id !== tableId)
+    );
+  };
+
+  // Handle "Select All"
+  const handleSelectAll = (isSelected: boolean) => {
+    setSelectedRows(isSelected ? tableRows.map((row) => row.tableId) : []);
+  };
+
+  const handleDownloadSelected = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    selectedRows.forEach((rowId) => {
+      const rowRef = rowRefs.current[rowId];
+      console.log(rowRef);
+      rowRef?.current?.download();
+    });
+  };
+  
+  const allSelected = selectedRows.length === tableRows.length;
+
+
   return (
     <div className={`flex flex-col bg-[#f7f7f7] gap-4 p-6 rounded-lg h-full`}>
       <div className="flex flex-row items-center justify-between lg:px-4">
@@ -22,6 +59,8 @@ export default function TableList({ tableRows }: TableLinks) {
             id="selectAll"
             type="checkbox"
             className="w-6 h-6 text-PrimBtn bg-gray-100 border-gray-300 rounded focus:[#b0438a] dark:focus:[#b0438a] dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            checked={allSelected}
+            onChange={(e) => handleSelectAll(e.target.checked)}
           />
           <label
             htmlFor="selectAll"
@@ -33,7 +72,7 @@ export default function TableList({ tableRows }: TableLinks) {
 
         <button
           className="border-2 border-solid border-primText text-primText text-xs lg:text-sm font-bold h-10 flex flex-row items-center px-3 rounded-lg"
-          onClick={(e) => e.preventDefault()}
+          onClick={handleDownloadSelected}
         >
           Download Selected
           <svg
@@ -56,12 +95,15 @@ export default function TableList({ tableRows }: TableLinks) {
       <div className="flex flex-col gap-6 px-4">
         {tableRows.map((tableRow, index) => (
           <TableRow
+            ref={rowRefs.current[tableRow.tableId]}
             key={index}
             tableId={tableRow.tableId}
             tableName={tableRow.tableName}
             menuLink={tableRow.menuLink}
             qrSizes={tableRow.qrSizes}
             qrSrcBaseUrl={tableRow.qrSrcBaseUrl}
+            isSelected={selectedRows.includes(tableRow.tableId)}
+            onSelectionChange={handleRowSelection}
           />
         ))}
       </div>

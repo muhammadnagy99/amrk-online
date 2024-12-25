@@ -73,6 +73,7 @@ export default function Menu({
   const [categories, setCategories] = useState<Category[]>(categoriesData);
   const [items, setItems] = useState<Items[]>(itemsData);
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
 
   const handleNextStep = () => {
     if (currentStep < totalSteps) {
@@ -235,40 +236,52 @@ export default function Menu({
         Categories: formattedCategories,
         Items: formattedItems,
       });
-      // const myHeaders = new Headers();
-      // myHeaders.append("Content-Type", "application/json");
-      // myHeaders.append("Accept", "application/json");
+      const myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Accept", "application/json");
 
-      // const requestOptions = {
-      //   method: "POST",
-      //   headers: myHeaders,
-      //   body: requestBody,
-      //   redirect: "follow" as const,
-      // };
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: requestBody,
+        redirect: "follow" as const,
+      };
 
-      // const response = await fetch(
-      //   "https://api.amrk.app/external/menuSetup",
-      //   requestOptions
-      // );
+      const response = await fetch(
+        "https://api.amrk.app/external/menuSetup",
+        requestOptions
+      );
 
-      //     if (!response.ok) {
-      //       console.error("API Error:", response.status, response.statusText);
-      //       return false;
-      //     }
+      if (!response.ok) {
+        console.error("API Error:", response.status, response.statusText);
+        return false;
+      }
 
-      //     const result = await response.json();
-      // console.log(result);
+      const result = await response.json();
+      console.log(result);
+
+      if (result && typeof result.success === "boolean") {
+        return result.success;
+      } else {
+        console.error("Unexpected API Response Structure:", result);
+        return false;
+      }
     } catch (error) {
       console.error("Error:", error);
     }
   };
 
   const createMenu = async () => {
+    setError(false);
     setLoading(true);
     onSubmit(items, categories);
-    await menuAPI();
-    setLoading(false);
-    // onNext();
+    const sucess = await menuAPI();
+    if (sucess) {
+      setLoading(false);
+      onNext();
+    }else{
+      setError(true)
+    }
   };
 
   const [overlayVisible, setOverlayVisible] = useState(false);
@@ -335,6 +348,8 @@ export default function Menu({
             {loading ? "Creating Your Menu...." : "Confirm Menu"}
           </button>
         )}
+
+        {error && <p className="text-red-500 text-sm">Something went wrong. Please try again later.</p>}
 
         <div className="w-full flex justify-between items-end">
           {currentStep > 1 && (

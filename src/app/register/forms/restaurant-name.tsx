@@ -36,54 +36,51 @@ export default function RestaurantName({
   
   const handleNext = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    const rest_id = "djfkhakdjfds";  //to be deleted
-    
+        
     if (restaurantNameTemp.length <= 0) {
       setErrorMessage("Please Your Restaurant Name.");
       return false;
     }
     
     setLoading(true);
-    onChange(restaurantNameTemp, rest_id);    //to be deleted
-    onNext();     //to be deleted
 
-    // const myHeaders = new Headers();
-    // myHeaders.append("Accept", "application/json");
-    // myHeaders.append("Content-Type", "application/json");
+    const myHeaders = new Headers();
+    myHeaders.append("Accept", "application/json");
+    myHeaders.append("Content-Type", "application/json");
 
-    // const raw = JSON.stringify({
-    //   restName: restaurantNameTemp,
-    // });
+    const raw = JSON.stringify({
+      restName: restaurantNameTemp,
+    });
 
-    // const requestOptions: RequestInit = {
-    //   method: "POST",
-    //   headers: myHeaders,
-    //   body: raw,
-    //   redirect: "follow",
-    // };
+    const requestOptions: RequestInit = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
 
-    // try {
-    //   const response = await fetch(
-    //     "https://api.amrk.app/external/addRestaurantName",
-    //     requestOptions
-    //   );
+    try {
+      const response = await fetch(
+        "https://api.amrk.app/external/addRestaurantName",
+        requestOptions
+      );
 
-    //   const result: ApiResponse = await response.json();
+      const result: ApiResponse = await response.json();
 
-    //   if (response.ok && result.success && result.rest_id) {
-    //     const { rest_id } = result;
-    //     onChange(restaurantNameTemp, rest_id);
-    //     onNext();
-    //   } else {
-    //     if (response.status === 409) {
-    //       setErrorMessage("This restaurant name is already taken. Please choose another.");
-    //     } else {
-    //       console.error("Failed to create restaurant:", result.msg);
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.error("Error making POST request:", error);
-    // }
+      if (response.ok && result.success && result.rest_id) {
+        const { rest_id } = result;
+        onChange(restaurantNameTemp, rest_id);
+        onNext();
+      } else {
+        if (response.status === 409) {
+          setErrorMessage("This restaurant name is already taken. Please choose another.");
+        } else {
+          console.error("Failed to create restaurant:", result.msg);
+        }
+      }
+    } catch (error) {
+      console.error("Error making POST request:", error);
+    }
   };
 
   return (

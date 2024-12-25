@@ -363,7 +363,13 @@ export default function RegisterPage() {
                 restaurantId={restaurantId}
               />
             )}
-            {currentStep === 8 && <Publishing onNext={handleNextStep} />}
+            {currentStep === 8 && (
+              <Publishing
+                onNext={handleNextStep}
+                restaurantId={restaurantId}
+                branchId={branchId}
+              />
+            )}
             {currentStep === 9 && <Finish />}
 
             {currentStep > 1 && (

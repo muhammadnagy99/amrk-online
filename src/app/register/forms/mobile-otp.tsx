@@ -58,43 +58,42 @@ export default function MobileOtp({
       return;
     }
     
-    setLoading(true); // to be deleted
-    setLoadingMsg('Verifying....') //to be deleted
-    onNext(); // to be deleted
+    setLoading(true);
+    setLoadingMsg('Verifying....')
 
-    // const myHeaders = new Headers();
-    // myHeaders.append("Accept", "application/json");
-    // myHeaders.append("Content-Type", "application/json");
+    const myHeaders = new Headers();
+    myHeaders.append("Accept", "application/json");
+    myHeaders.append("Content-Type", "application/json");
 
-    // const raw = JSON.stringify({
-    //   otpCode: otp,
-    //   rest_id: restaurantId,
-    // });
+    const raw = JSON.stringify({
+      otpCode: otp,
+      rest_id: restaurantId,
+    });
 
-    // const requestOptions: RequestInit = {
-    //   method: "POST",
-    //   headers: myHeaders,
-    //   body: raw,
-    //   redirect: "follow",
-    // };
+    const requestOptions: RequestInit = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
 
-    // try {
-    //   const response = await fetch("https://api.amrk.app/external/verifyOTP", requestOptions);
-    //   const result = await response.json();
+    try {
+      const response = await fetch("https://api.amrk.app/external/verifyOTP", requestOptions);
+      const result = await response.json();
 
-    //   if (response.ok) {
-    //     console.log(result);
-    //     onNext();
-    //   } else {
-    //     console.error("Verification failed:", result);
-    //     setErrorMessage("OTP verification failed, please try again.");
-    //   }
-    // } catch (error) {
-    //   console.error("Error during OTP verification:", error);
-    //   setErrorMessage("There was an error while verifying the OTP. Please try again.");
-    // } finally {
-    //   setLoading(false);
-    // }
+      if (response.ok) {
+        console.log(result);
+        onNext();
+      } else {
+        console.error("Verification failed:", result);
+        setErrorMessage("OTP verification failed, please try again.");
+      }
+    } catch (error) {
+      console.error("Error during OTP verification:", error);
+      setErrorMessage("There was an error while verifying the OTP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResendOTP = async () => {
@@ -104,45 +103,45 @@ export default function MobileOtp({
     setErrorMessage(null);
     setLoadingMsg('Sending New OTP...');
   
-    // const myHeaders = new Headers();
-    // myHeaders.append("Content-Type", "application/json");
-    // myHeaders.append("Accept", "application/json");
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Accept", "application/json");
 
-    // const raw = JSON.stringify({
-    //   mobileNum: rest_mobile,
-    //   rest_id: restaurantId,
-    // });
+    const raw = JSON.stringify({
+      mobileNum: rest_mobile,
+      rest_id: restaurantId,
+    });
 
-    // const requestOptions: RequestInit = {
-    //   method: "POST",
-    //   headers: myHeaders,
-    //   body: raw,
-    //   redirect: "follow",
-    // };
+    const requestOptions: RequestInit = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
 
-    // try {
-    //   const response = await fetch(
-    //     "https://api.amrk.app/external/resendOTP",
-    //     requestOptions
-    //   );
-    //   const result = await response.json();
+    try {
+      const response = await fetch(
+        "https://api.amrk.app/external/resendOTP",
+        requestOptions
+      );
+      const result = await response.json();
 
-    //   if (response.ok) {
-    //     console.log(result);
-    //     setLoadingMsg('Verify');
-    //     setSuccessMessage("OTP has been resent! Please check your phone.");
-    //   } else {
-    //     console.error("Resend OTP failed:", result);
-    //     setErrorMessage("Failed to resend OTP. Please try again.");
-    //   }
-    // } catch (error) {
-    //   console.error("Error during OTP resend:", error);
-    //   setErrorMessage(
-    //     "There was an error while resending the OTP. Please try again."
-    //   );
-    // } finally {
-    //   setLoading(false);
-    // }
+      if (response.ok) {
+        console.log(result);
+        setLoadingMsg('Verify');
+        setSuccessMessage("OTP has been resent! Please check your phone.");
+      } else {
+        console.error("Resend OTP failed:", result);
+        setErrorMessage("Failed to resend OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during OTP resend:", error);
+      setErrorMessage(
+        "There was an error while resending the OTP. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -45,35 +45,33 @@ export const PaymentAPI = async (
     },
   });
 
-  return true;
+  const requestOptions: RequestInit = {
+    method: "POST",
+    headers: myHeaders,
+    body: raw,
+    redirect: "follow" as const,
+  };
 
-//   const requestOptions: RequestInit = {
-//     method: "POST",
-//     headers: myHeaders,
-//     body: raw,
-//     redirect: "follow" as const,
-//   };
+  try {
+    const response = await fetch(
+      "https://api.amrk.app/external/addPaymentBranch",
+      requestOptions
+    );
 
-//   try {
-//     const response = await fetch(
-//       "https://api.amrk.app/external/addPaymentBranch",
-//       requestOptions
-//     );
+    if (!response.ok) {
+      console.error("API Error:", response.status, response.statusText);
+      return false;
+    }
 
-//     if (!response.ok) {
-//       console.error("API Error:", response.status, response.statusText);
-//       return false;
-//     }
+    const result = await response.json();
 
-//     const result = await response.json();
-
-//     if (result && typeof result.success === "boolean") {
-//       return result.success;
-//     } else {
-//       console.error("Unexpected API Response Structure:", result);
-//       return false;
-//     }
-//   } catch (error) {
-//     return false;
-//   }
+    if (result && typeof result.success === "boolean") {
+      return result.success;
+    } else {
+      console.error("Unexpected API Response Structure:", result);
+      return false;
+    }
+  } catch (error) {
+    return false;
+  }
 };

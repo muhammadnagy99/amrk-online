@@ -1,6 +1,7 @@
 import { useState, SetStateAction } from "react";
 import Image from "next/image";
 import Line from "./line";
+import QrCode from "./qr-code";
 
 type MenuOption = {
   id: number;
@@ -17,7 +18,7 @@ type ServiceOverlayProps = {
   serviceName: string;
   menuOptions: MenuOption[];
   qrSizes: QrSizeOption[];
-  qrSrcBaseUrl: string;
+  qrSrcBaseUrl?: string;
 };
 
 export default function ServiceOverlay({
@@ -29,6 +30,7 @@ export default function ServiceOverlay({
   const [selectedMenu, setSelectedMenu] = useState(menuOptions[0]);
   const [qrSize, setQrSize] = useState(qrSizes[0].value);
   const [qrTitle, setQrTitle] = useState("");
+  const [qrSaveName, setQrSaveName] = useState(menuOptions[0].name)
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
 
   const handleMenuChange = (event: { target: { value: string } }) => {
@@ -36,6 +38,7 @@ export default function ServiceOverlay({
       (option) => option.id === parseInt(event.target.value)
     );
     setSelectedMenu(selected || menuOptions[0]);
+    setQrSaveName(selected?.name || '');
   };
 
   const handleQrSizeChange = (event: { target: { value: any } }) => {
@@ -46,20 +49,12 @@ export default function ServiceOverlay({
     target: { value: SetStateAction<string> };
   }) => {
     setQrTitle(event.target.value);
+    setQrSaveName(event.target.value);
   };
 
   const qrSrc = `${qrSrcBaseUrl}?size=${qrSize}&title=${encodeURIComponent(
     qrTitle || selectedMenu.name
   )}`;
-
-  const handleDownload = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    const link = document.createElement("a");
-    console.log(qrSrc);
-    link.href = qrSrc;
-    link.download = `${selectedMenu.name}-QR.png`;
-    link.click();
-  };
 
   const copyToClipboard = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -73,7 +68,7 @@ export default function ServiceOverlay({
   };
 
   return (
-    <div className="flex flex-col gap-4 py-4">
+    <div className="flex flex-col gap-4 py-6 custom-scrollbar h-[720px] overflow-scroll">
       {/* Menu Selection */}
       <div className="flex flex-col gap-4 w-full">
         <label className="text-base lg:text-xl font-semibold text-primText">
@@ -180,7 +175,7 @@ export default function ServiceOverlay({
           </label>
           <div className="relative">
             <select
-              className="block w-full appearance-none border h-12 border-gray-300 rounded-md bg-white px-4 py-2 text-primText text-base focus:ring-2 focus:[#23314c] focus:outline-none hover:bg-gray-100"
+              className="block w-full appearance-none border h-12 border-gray-300 rounded-md bg-white px-4 py-2 text-primText text-base focus:outline-none hover:bg-gray-100"
               value={qrSize}
               onChange={handleQrSizeChange}
             >
@@ -210,27 +205,7 @@ export default function ServiceOverlay({
       </div>
 
       {/* QR Code Image Display */}
-      <div className="flex flex-row items-end justify-between">
-        <Image src={qrSrc} width={qrSize} height={qrSize} alt="QR Code" />
-        <button
-          onClick={handleDownload}
-          className="border-2 border-solid border-PrimBtn text-PrimBtn text-sm font-bold h-10 flex flex-row items-center px-3 rounded-lg"
-        >
-          Download QR
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 16L7 11L8.4 9.55L11 12.15V4H13V12.15L15.6 9.55L17 11L12 16ZM4 20V15H6V18H18V15H20V20H4Z"
-              fill="#B0438A"
-            />
-          </svg>
-        </button>
-      </div>
+      <QrCode value={selectedMenu.link} size={qrSize} logoUrl='./logo.png' title={`${serviceName}-${qrSaveName}-Qr-${qrSizes.find(size => size.value === qrSize)?.label}`}/>
     </div>
   );
 }

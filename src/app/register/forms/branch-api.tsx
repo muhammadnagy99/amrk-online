@@ -92,36 +92,35 @@ export const branchDataAPI = async (
 
   try {
     console.log("Sending payload:", payload);
-    delay(1500);
-    return "Hello I am branch Id";
+    
     // Define headers and request options
-    // const response = await fetch("https://api.amrk.app/external/addBranch", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Accept: "application/json",
-    //   },
-    //   body: JSON.stringify(payload),
-    // });
+    const response = await fetch("https://api.amrk.app/external/addBranch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
-    // if (!response.ok) {
-    //   const errorResponse = await response.json();
-    //   console.error("API request failed:", errorResponse);
-    //   throw new Error(
-    //     `API request failed with status ${response.status}: ${errorResponse.message || "Unknown error"}`
-    //   );
-    // }
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      console.error("API request failed:", errorResponse);
+      throw new Error(
+        `API request failed with status ${response.status}: ${errorResponse.message || "Unknown error"}`
+      );
+    }
 
-    // const result = await response.json();
-    // console.log("Success:", result);
+    const result = await response.json();
+    console.log("Success:", result);
 
-    // if (result.success) {
-    //   console.log("Branch ID:", result.branchId);
-    //   return result.branchId;
-    // } else {
-    //   console.error("API Error:", result.msg);
-    //   return '';
-    // }
+    if (result.success) {
+      console.log("Branch ID:", result.branchId);
+      return result.branchId;
+    } else {
+      console.error("API Error:", result.msg);
+      return '';
+    }
   } catch (error) {
     console.error("Error in branchDataAPI:", error);
     throw error; // Ensure the error propagates to be handled upstream

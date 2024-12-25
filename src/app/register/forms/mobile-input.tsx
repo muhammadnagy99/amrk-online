@@ -110,50 +110,46 @@ export default function MobileInput({ restaurantId, restaurantMobile, selectCoun
     setLoading(true);
 
     setErrorMessage(null);
-    onSubmit(phoneNumber, selectedCountry); 
-    // to be deleted
-    onNext();   
-    // to be deleted
 
-    // const myHeaders = new Headers();
-    // myHeaders.append("Accept", "application/json");
-    // myHeaders.append("Content-Type", "application/json");
+    const myHeaders = new Headers();
+    myHeaders.append("Accept", "application/json");
+    myHeaders.append("Content-Type", "application/json");
 
-    // const raw = JSON.stringify({
-    //   mobileNum: phoneNumber,
-    //   rest_id: restaurantId,
-    // });
+    const raw = JSON.stringify({
+      mobileNum: phoneNumber,
+      rest_id: restaurantId,
+    });
 
-    // const requestOptions: RequestInit = {
-    //   method: "POST",
-    //   headers: myHeaders,
-    //   body: raw,
-    //   redirect: "follow",
-    // };
+    const requestOptions: RequestInit = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
 
-    // try {
-    //   const response = await fetch(
-    //     "https://api.amrk.app/external/addMobileNumber",
-    //     requestOptions
-    //   );
+    try {
+      const response = await fetch(
+        "https://api.amrk.app/external/addMobileNumber",
+        requestOptions
+      );
 
-    //   if (response.ok) {
-    //     const result = await response.json();
-    //     if (result.success) {
-    //       onSubmit(phoneNumber);
-    //       onNext();
-    //     } else {
-    //       setErrorMessage("Failed to add mobile number. Please try again.");
-    //     }
-    //   } else {
-    //     setErrorMessage("Something went wrong. Please try again.");
-    //   }
-    // } catch (error) {
-    //   console.error("Error making POST request:", error);
-    //   setErrorMessage("Network error. Please check your connection.");
-    // } finally {
-    //   setLoading(false);
-    // }
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          onSubmit(phoneNumber, selectedCountry); 
+          onNext();
+        } else {
+          setErrorMessage("Failed to add mobile number. Please try again.");
+        }
+      } else {
+        setErrorMessage("Something went wrong. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error making POST request:", error);
+      setErrorMessage("Network error. Please check your connection.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

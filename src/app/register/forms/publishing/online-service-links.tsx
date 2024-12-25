@@ -3,14 +3,14 @@
 import React from "react";
 import ServicesRow from "./components/services-row";
 
-type ServiceRowData = {
+export type ServiceRowData = {
   serviceName: string;
   menuOptions: { id: number; name: string; link: string }[];
   qrSizes: { label: string; value: number }[];
-  qrSrcBaseUrl: string;
+  qrSrcBaseUrl?: string;
 };
 
-type OnlineLinksProps = {
+export type OnlineLinksProps = {
   serviceRows: ServiceRowData[]; 
 };
 

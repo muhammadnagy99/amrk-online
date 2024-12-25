@@ -19,7 +19,7 @@ type ServicesRowProps = {
   serviceName: string;
   menuOptions: MenuOption[];
   qrSizes: QrSizeOption[];
-  qrSrcBaseUrl: string;
+  qrSrcBaseUrl?: string;
 };
 
 export default function ServicesRow({
