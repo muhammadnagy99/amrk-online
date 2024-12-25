@@ -240,11 +240,12 @@ export default function Menu({
       myHeaders.append("Content-Type", "application/json");
       myHeaders.append("Accept", "application/json");
 
-      const requestOptions = {
+      const requestOptions: RequestInit = {
         method: "POST",
         headers: myHeaders,
         body: requestBody,
         redirect: "follow" as const,
+        mode: "no-cors",
       };
 
       const response = await fetch(

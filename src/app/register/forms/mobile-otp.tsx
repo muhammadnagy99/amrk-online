@@ -75,6 +75,7 @@ export default function MobileOtp({
       headers: myHeaders,
       body: raw,
       redirect: "follow",
+      mode: "no-cors",
     };
 
     try {
@@ -117,6 +118,7 @@ export default function MobileOtp({
       headers: myHeaders,
       body: raw,
       redirect: "follow",
+      mode: "no-cors",
     };
 
     try {

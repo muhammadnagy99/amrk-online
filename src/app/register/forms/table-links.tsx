@@ -1,6 +1,7 @@
 export async function fetchAndTransformTables(branchId: string) {
   const requestOptions: RequestInit = {
     method: "GET",
+    mode: "no-cors",
     redirect: "follow",
   };
 
