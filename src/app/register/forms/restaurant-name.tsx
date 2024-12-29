@@ -57,6 +57,7 @@ export default function RestaurantName({
       headers: myHeaders,
       body: raw,
       redirect: "follow",
+      mode:"cors"
     };
 
     try {
