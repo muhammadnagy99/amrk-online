@@ -1,7 +1,6 @@
 export async function fetchServiceRows(branchId: string) {
     const requestOptions: RequestInit = {
       method: "GET",
-      mode: "no-cors",
       redirect: "follow",
     };
   

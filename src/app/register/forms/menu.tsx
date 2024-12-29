@@ -245,7 +245,6 @@ export default function Menu({
         headers: myHeaders,
         body: requestBody,
         redirect: "follow" as const,
-        mode: "no-cors",
       };
 
       const response = await fetch(

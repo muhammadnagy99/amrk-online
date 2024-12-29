@@ -125,7 +125,6 @@ export default function MobileInput({ restaurantId, restaurantMobile, selectCoun
       headers: myHeaders,
       body: raw,
       redirect: "follow",
-      mode: "no-cors",
     };
 
     try {

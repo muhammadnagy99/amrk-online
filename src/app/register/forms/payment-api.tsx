@@ -50,7 +50,6 @@ export const PaymentAPI = async (
     headers: myHeaders,
     body: raw,
     redirect: "follow" as const,
-    mode: "no-cors",
   };
 
   try {
