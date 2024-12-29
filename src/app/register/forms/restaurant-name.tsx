@@ -38,7 +38,7 @@ export default function RestaurantName({
     e.preventDefault();
         
     if (restaurantNameTemp.length <= 0) {
-      setErrorMessage("Please Your Restaurant Name.");
+      setErrorMessage("Please Enter Your Restaurant Name.");
       return false;
     }
     
@@ -57,7 +57,6 @@ export default function RestaurantName({
       headers: myHeaders,
       body: raw,
       redirect: "follow",
-      mode: "no-cors",
     };
 
     try {
