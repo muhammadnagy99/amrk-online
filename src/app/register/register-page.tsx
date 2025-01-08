@@ -15,6 +15,7 @@ import Finish from "./forms/finish";
 import HeaderMobile from "@/src/components/header-mobile";
 import { s } from "framer-motion/client";
 import { branchDataAPI } from "./forms/branch-api";
+import MobileHeader from "@/src/components/mobile-header";
 
 interface CountryOption {
   value: string;
@@ -276,8 +277,9 @@ export default function RegisterPage() {
 
   return (
     <>
-      <div className="flex flex-row w-full h-[100vh]">
+      <div className="flex flex-col lg:flex-row w-full h-[100vh] gap-14 lg:gap-0">
         <SideBar />
+        <MobileHeader />
 
         <div className="w-full lg:w-4/5 flex items-center justify-center p-7 overflow-y-auto custom-scrollbar">
           <div className="w-full lg:w-[70%] max-w-[770px] p-6 lg:p-7 rounded-2xl nav-card gap-3 flex flex-col lg:px-12 mt-6 lg:mt-24">
